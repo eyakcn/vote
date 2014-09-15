@@ -1,0 +1,7 @@
+{
+
+  // Java verticle
+  "main":"io.sophone.Main",
+
+  "auto-redeploy": true
+}
