@@ -11,9 +11,9 @@
   <url>http://maven.apache.org</url>
 
   <parent>
-     <groupId>org.sonatype.oss</groupId>
-     <artifactId>oss-parent</artifactId>
-     <version>7</version>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
   </parent>
 
   <properties>
@@ -44,6 +44,7 @@
     <xstream.version>1.4.7</xstream.version>
     <json.version>2.2.4</json.version>
     <annotation.version>13.0</annotation.version>
+    <commonlang.version>3.3.2</commonlang.version>
 
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
@@ -65,6 +66,11 @@
   </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commonlang.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
