@@ -59,7 +59,7 @@ public class Main extends Verticle {
 
             if (answerMap.containsKey(answer)) {
                 Integer count = answerMap.get(answer);
-                answerMap.put(answer, count++);
+                answerMap.put(answer, ++count);
             } else {
                 answerMap.put(answer, 1);
             }
