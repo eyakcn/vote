@@ -13,19 +13,13 @@
       width: 100%;
       text-align: center;
     }
-    .question {margin-top: 12px;}
+    .question {position: relative;}
     .question strong{margin-left: -20px;}
-    input.answer {
-      height: 21px;
-      text-align: center;
-    }
-    .answer {
-      border: none;
-      outline: none;
-      background-color: rgb(161, 255, 161);
-    }
+    input.answer { height: 21px; text-align: center;}
+    textarea.answer { margin-left: 10px; }
+    .answer { border: none; outline: none; background-color: rgb(161, 255, 161);}
     .answer.empty {background-color: rgb(250, 157, 168);}
-    div.choice {cursor: pointer;}
+    div.choice {cursor: pointer; position: relative; margin-bottom: 30px;}
     div.choice:hover {background-color: rgb(161, 255, 161);}
     .img-link{border: 1px solid; width: 240px; margin-top: 20px; cursor: pointer;}
     #img-preview {
@@ -40,6 +34,10 @@
       height: 100%;
     }
     #admin{position: fixed; top: 0px; right: 0px; width: 100px; height: 40px; cursor: pointer;}
+    .question .count {top: 40px; left: -70px; border-radius: 3px;}
+    .choice .count {top: 20px; left: 35px; border-radius: 15px; font-size: 15px;}
+    .count{position: absolute; background: rgb(161, 255, 161); color: white; min-width: 20px; text-align: center; padding: 0px 2px;}
+    .count.empty {background-color: rgb(250, 157, 168);}
   </style>
 </head>
 <body>
@@ -137,8 +135,8 @@
         <strong class="col-md-11">5. 質問4で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -176,8 +174,8 @@
         <strong class="col-md-11">8. 質問7で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -215,8 +213,8 @@
         <strong class="col-md-11">11. 質問10で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -254,8 +252,8 @@
         <strong class="col-md-11">14. 質問13で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -293,8 +291,8 @@
         <strong class="col-md-11">17. 質問16で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -332,8 +330,8 @@
         <strong class="col-md-11">20. 質問19で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
-        <textarea class="answer empty col-md-6"></textarea>
+
+        <textarea class="answer empty col-md-10"></textarea>
       </div>
     </div>
 
@@ -385,7 +383,7 @@
         <strong class="col-md-11">24. 多言語表示のメリットやディメリットについて、ご意見があれば、お聞かせください。</strong>
       </div>
       <div class="row">
-        <div class="col-md-1"></div>
+
         <textarea class="answer empty col-md-10" rows="4"></textarea>
       </div>
     </div>
