@@ -43,8 +43,11 @@ $(function() {
       var $answer = $(this).find('.answer:first');
 
       var questionNumber = $question.data('number');
-      var answerText = $answer.val();
-
+      var answerText = $answer.val().trim();
+      var maxLength = $answer.attr('maxlength');
+      if (answerText.length > maxLength) {
+        answerText.substring(0, maxLength);
+      }
       result.push(answerText);
     });
     $.ajax({

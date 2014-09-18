@@ -98,6 +98,9 @@ public class Main extends Verticle {
                     request.response().end();
                 })
                 .post("/osaka/counting", request -> {
+                    if (request.body() == null) {
+                        return;
+                    }
                     List<String> answers = ((JsonArray) request.body()).toList();
                     String line = StringUtils.join(answers, delimiter);
                     analyzeLine(line);
