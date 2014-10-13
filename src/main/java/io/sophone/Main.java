@@ -4,7 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.Yoke;
+import com.jetdrone.vertx.yoke.engine.GroovyTemplateEngine;
+import com.jetdrone.vertx.yoke.engine.StringPlaceholderEngine;
 import com.jetdrone.vertx.yoke.middleware.*;
+import io.sophone.engine.ThymeleafEngine;
+import io.sophone.vote.WechatVoteHandler;
+import io.sophone.wechat.Identity;
 import org.apache.commons.lang3.StringUtils;
 import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.platform.Verticle;
@@ -25,6 +30,7 @@ public class Main extends Verticle {
     private static final String answerFilePath;
     private static final List<Map<String, Integer>> statistic = new ArrayList<>();
     private static final List<List<String>> parsedAnswers = new ArrayList<>();
+    private static final Identity wechatId;
 
     static {
         answerFilePath = baseDir + "questionnaire.txt";
@@ -36,6 +42,16 @@ public class Main extends Verticle {
             } else {
                 answerFile.createNewFile();
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // Init Wechat app identity
+        File idFile = new File(baseDir + "identity.json");
+        if (!idFile.exists()) {
+            throw new RuntimeException("No identity.json found. baseDir=" + baseDir);
+        }
+        try {
+            wechatId = new Gson().fromJson(new String(Files.readAllBytes(idFile.toPath())), Identity.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -69,12 +85,19 @@ public class Main extends Verticle {
 
     @Override
     public void start() {
+        WechatVoteHandler.setHttpClient(vertx.createHttpClient());
+        WechatVoteHandler.setIdentity(wechatId);
+        WechatVoteHandler.setContainer(container);
+
         Yoke app = new Yoke(vertx);
+        app.set("title", "COMEARLY");
+        app.engine(new ThymeleafEngine("webroot"));
         app.use(new ErrorHandler(true));
         app.use(new Limit(4096));
         app.use(new BodyParser());
-        app.use(new Static("webroot", 0, true, false));
+        app.use("/wechat/vote", new WechatVoteHandler());
         app.use(getRouter());
+        app.use("/webroot", new Static("webroot", 0, true, false));
         app.listen(8181);
     }
 
