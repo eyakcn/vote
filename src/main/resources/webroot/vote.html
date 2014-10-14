@@ -6,64 +6,75 @@
   <title>华政刑司家园</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
   <style>
-    li.selected{
-      background-color: CornflowerBlue;
+    article>details>summary {
+      display: block;
+      font-size: 1.15em;
+      -webkit-margin-before: 0.83em;
+      -webkit-margin-after: 0.83em;
+      -webkit-margin-start: 0px;
+      -webkit-margin-end: 0px;
+      font-weight: bold;
+    }
+    section {
+      position: relative;
+    }
+    section>details>summary {
+      display: block;
+      font-size: 1.015em;
+      font-weight: bold;
+      margin: 6px 0px;
+    }
+    section>div {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 30px;
+      height: 40px;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <div id="user" th:object="${user}" class="row">
-    <input name="openid" type="text" th:value="*{openid}"/>
-    <input name="nickname" type="text" th:value="*{nickname}"/>
-    <input name="sex" type="text" th:value="*{sex}"/>
-    <input name="province" type="text" th:value="*{province}"/>
-    <input name="city" type="text" th:value="*{city}"/>
-    <input name="country" type="text" th:value="*{country}"/>
-    <input name="headimgurl" type="text" th:value="*{headimgurl}"/>
+  <div id="user" th:object="${user}" style="display: none;">
+    <input name="openid" type="hidden" th:value="*{openid}"/>
+    <input name="nickname" type="hidden" th:value="*{nickname}"/>
+    <input name="sex" type="hidden" th:value="*{sex}"/>
+    <input name="province" type="hidden" th:value="*{province}"/>
+    <input name="city" type="hidden" th:value="*{city}"/>
+    <input name="country" type="hidden" th:value="*{country}"/>
+    <input name="headimgurl" type="hidden" th:value="*{headimgurl}"/>
   </div>
-  <div class="row">
-    <div id="title" class="col-xs-12"><h4>评选心目中的优秀部门</h4></div>
-  </div>
-  <div class="row">
-    <div id="introduction" class="col-xs-12">活动介绍。。。</div>
-  </div>
-  <div class="row">
-    <div id="rule" class="col-xs-12">活动规则。。。</div>
-  </div>
-  <div class="row">
-    <div id="deadline" class="col-xs-12">投票时间。。。</div>
-  </div>
-  <div class="row">
-    <div id="others" class="col-xs-12">结果公布。。。</div>
-  </div>
-  <div class="row">
-    <div id="candidates" class="col-xs-12">
-      <ul class="list-group">
-        <li class="list-group-item">组织部</li>
-        <li class="list-group-item">秘书处</li>
-        <li class="list-group-item">团校部</li>
-        <li class="list-group-item">外联部</li>
-        <li class="list-group-item">志工部</li>
-        <li class="list-group-item">实践部</li>
-        <li class="list-group-item">宣传部</li>
-        <li class="list-group-item">文艺部</li>
-        <li class="list-group-item">体育部</li>
-        <li class="list-group-item">生活部</li>
-        <li class="list-group-item">网信部</li>
-        <li class="list-group-item">学术部</li>
-        <li class="list-group-item">辩论队</li>
-      </ul>
+  <article id="content" th:object="${content}" class="row">
+    <details open="true" class="col-xs-12">
+      <summary th:text="*{title + ' (' + count + ')'}"></summary>
+      <img th:src="*{image}" style="width: 100%;"/>
+      <p th:text="*{text}"></p>
+      <input name="title" type="hidden" th:value="*{title}"/>
+      <input name="minSelection" type="hidden" th:value="*{minSelection}"/>
+      <input name="maxSelection" type="hidden" th:value="*{maxSelection}"/>
+    </details>
+  </article>
+  <section th:each="candidate : ${content.candidates}" class="row">
+    <div>
+      <input type="checkbox"/>
+      <input type="hidden" th:value="${candidate.caption}"/>
     </div>
-  </div>
+    <details th:object="${candidate}" class="col-xs-12">
+      <summary>
+        <a th:text="*{caption + ' (' + count + ')'}"></a>
+      </summary>
+      <img th:src="*{image}" style="width: 100%;"/>
+      <p th:text="*{text}"></p>
+    </details>
+  </section>
   <div class="row">
     <div class="col-xs-12">
-      <button type="button" class="btn btn-primary">确定</button>
+      <button id="submit" type="button" class="btn btn-primary">提交</button>
     </div>
   </div>
 </div>
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-<script type="text/javascript" src="vote.js"></script>
-<script type="text/javascript" src="lib/beautify.js"></script>
+<script type="text/javascript" src="/webroot/vote.js"></script>
 </html>
