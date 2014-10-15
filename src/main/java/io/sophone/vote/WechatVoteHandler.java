@@ -11,9 +11,18 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.json.impl.Json;
 import org.vertx.java.platform.Container;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by eyakcn on 2014/10/13.
@@ -43,9 +52,30 @@ public class WechatVoteHandler extends Middleware {
 
     private static final String TOKEN_URL = "/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
     private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
+
+    private static final String baseDir = System.getProperty("user.home") + "/";
+    private static final String answerFilePath = baseDir + "vote_history.txt";
+
+    private static final Map<String, SnsUser> userMap = new HashMap<>();
+
     private static final VoteContent voteContent;
 
     static {
+        File answerFile = new File(answerFilePath);
+        try {
+            if (answerFile.exists()) {
+                List<String> lines = Files.readAllLines(answerFile.toPath());
+                lines.forEach(line -> {
+                    JsonObject answer = Json.decodeValue(line, JsonObject.class);
+                    analyzeAnswer(answer);
+                });
+            } else {
+                answerFile.createNewFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         voteContent = new VoteContent();
         voteContent.title = "最受欢迎实践队伍";
         voteContent.text = "经过华东政法大学第一届社会实践大赛初赛，18支优秀实践队伍脱颖而出进入决赛，同事角逐。。。";
@@ -102,22 +132,30 @@ public class WechatVoteHandler extends Middleware {
     private void handleGet(YokeRequest request, Handler<Object> next) {
         String code = request.getParameter("code");
 //        String state = request.getParameter("state");
+
+        // TODO load vote content from file
+        request.put("content", voteContent);
+
         if (code != null) {
             final String tokenUrl = MessageFormat.format(TOKEN_URL, id.appid, id.secret, code);
             HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
                 OAuth2Token token = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
                 if (token.errcode == null) {
-                    final String userUrl = MessageFormat.format(USRINFO_URL, token.access_token, token.openid);
-                    HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
-                        SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
-                        if (user.errcode == null) {
-                            request.put("user", user);
-                            // TODO load vote content from file
-                            request.put("content", voteContent);
-                            request.response().render("vote.html");
-                        }
-                    }));
-                    userReq.end();
+                    SnsUser fetchedUser = userMap.get(token.openid);
+                    if (fetchedUser == null) {
+                        final String userUrl = MessageFormat.format(USRINFO_URL, token.access_token, token.openid);
+                        HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
+                            SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
+                            if (user.errcode == null) {
+                                request.put("user", user);
+                                request.response().render("vote.html");
+                            }
+                        }));
+                        userReq.end();
+                    } else {
+                        request.put("user", fetchedUser);
+                        request.response().render("vote.html");
+                    }
                 } else {
                     container.logger().error(token.errmsg);
                     request.response().end("Failed authentication.");
@@ -126,7 +164,6 @@ public class WechatVoteHandler extends Middleware {
             tokenReq.end();
         } else {
             request.put("user", new SnsUser());
-            request.put("content", voteContent);
             request.response().render("vote.html");
         }
     }
@@ -136,8 +173,47 @@ public class WechatVoteHandler extends Middleware {
             return;
         }
         JsonObject answer = (JsonObject) request.body();
+        if (answer.getString("openid") == null) {
+            request.response().end("false");
+            return;
+        }
+        analyzeAnswer(answer);
+
+        String line = answer.encode();
+        List<String> lines = new ArrayList<String>();
+        lines.add(line);
+        File answerFile = new File(answerFilePath);
+        try {
+            Files.write(answerFile.toPath(), lines, StandardOpenOption.APPEND);
+            container.logger().info("New answer add to: " + answerFilePath);
+        } catch (IOException e) {
+            container.logger().error("Failed to write answers file!" + e.toString());
+        }
+        request.response().end("true");
+    }
+
+    private static final Map<String, VoteCounting> voteCountingMap = new HashMap<>();
+
+    private static void analyzeAnswer(JsonObject answer) {
         String openid = answer.getString("openid");
         String title = answer.getString("title");
-        Object[] selections = answer.getArray("selections").toArray();
+        String time = answer.getString("time");
+        List<String> selections = (List<String>) answer.getArray("selections").toList();
+
+        VoteCounting counting = voteCountingMap.get(title);
+        if (counting == null) {
+            counting = new VoteCounting(title);
+            voteCountingMap.put(title, counting);
+        }
+
+        SnsUser user = userMap.get(openid);
+        user.reserveField = time; // backup vote time into reserve field, this design seems smell
+        List<String> prevSelections = counting.fetchUserSelections(openid);
+        if (prevSelections != null) {
+            counting.removeUserFromSelections(prevSelections, openid);
+        }
+
+        counting.addUserToSelections(selections, user);
+        counting.recordUserSelections(openid, selections);
     }
 }

@@ -25,7 +25,9 @@ $(function() {
     var result = {};
     result.openid = openid;
     result.title = title;
+    result.time = (new Date()).toISOString();
     result.selections = [];
+
     $('input[type="checkbox"]:checked').each(function() {
       var caption = $(this).next().val();
       result.selections.push(caption);

@@ -23,12 +23,11 @@ import java.util.*;
 public class QuestionnaireStatisticHandler extends Middleware {
     private static final String delimiter = " | ";
     private static final String baseDir = System.getProperty("user.home") + "/";
-    private static final String answerFilePath;
+    private static final String answerFilePath = baseDir + "questionnaire.txt";
     private static final List<Map<String, Integer>> statistic = new ArrayList<>();
     private static final List<List<String>> parsedAnswers = new ArrayList<>();
 
     static {
-        answerFilePath = baseDir + "questionnaire.txt";
         File answerFile = new File(answerFilePath);
         try {
             if (answerFile.exists()) {

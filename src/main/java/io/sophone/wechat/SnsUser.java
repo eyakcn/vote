@@ -1,11 +1,12 @@
 package io.sophone.wechat;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by eyakcn on 2014/10/13.
  */
-public class SnsUser {
+public final class SnsUser {
     public String openid; // 用户的唯一标识
     public String nickname; // 用户昵称
     public Short sex; // 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
@@ -17,4 +18,25 @@ public class SnsUser {
 
     public String errcode;
     public String errmsg;
+
+    public String reserveField;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof SnsUser)) {
+            return false;
+        }
+        if (openid == null && ((SnsUser) obj).openid == null) {
+            return true;
+        }
+        return openid != null && openid.equals(((SnsUser) obj).openid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(openid);
+    }
 }
