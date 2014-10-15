@@ -54,6 +54,7 @@ public class WechatVoteHandler extends Middleware {
     private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
 
     private static final String baseDir = System.getProperty("user.home") + "/";
+    private static final String userFilePath = baseDir + "wechat_users.txt";
     private static final String answerFilePath = baseDir + "vote_history.txt";
 
     private static final Map<String, SnsUser> userMap = new HashMap<>();
@@ -61,13 +62,28 @@ public class WechatVoteHandler extends Middleware {
     private static final VoteContent voteContent;
 
     static {
+        File userFile = new File(userFilePath);
+        try {
+            if (userFile.exists()) {
+                List<String> lines = Files.readAllLines(userFile.toPath());
+                lines.forEach(line -> {
+                    SnsUser user = Json.decodeValue(line, SnsUser.class);
+                    userMap.put(user.openid, user);
+                });
+            } else {
+                userFile.createNewFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         File answerFile = new File(answerFilePath);
         try {
             if (answerFile.exists()) {
                 List<String> lines = Files.readAllLines(answerFile.toPath());
                 lines.forEach(line -> {
                     JsonObject answer = Json.decodeValue(line, JsonObject.class);
-                    analyzeAnswer(answer);
+                    analyzeAnswer(answer); // need userMap prepared
                 });
             } else {
                 answerFile.createNewFile();
@@ -149,6 +165,17 @@ public class WechatVoteHandler extends Middleware {
                             if (user.errcode == null) {
                                 request.put("user", user);
                                 request.response().render("vote.html");
+
+                                userMap.put(user.openid, user);
+                                List<String> lines = new ArrayList<String>();
+                                lines.add(userResBody.toString());
+                                File userFile = new File(userFilePath);
+                                try {
+                                    Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
+                                    container.logger().info("New user add to: " + userFilePath);
+                                } catch (IOException e) {
+                                    container.logger().error("Failed to write user file!" + e.toString());
+                                }
                             }
                         }));
                         userReq.end();
@@ -196,6 +223,9 @@ public class WechatVoteHandler extends Middleware {
 
     private static void analyzeAnswer(JsonObject answer) {
         String openid = answer.getString("openid");
+        if (openid == null) {
+            return;
+        }
         String title = answer.getString("title");
         String time = answer.getString("time");
         List<String> selections = (List<String>) answer.getArray("selections").toList();
@@ -207,6 +237,9 @@ public class WechatVoteHandler extends Middleware {
         }
 
         SnsUser user = userMap.get(openid);
+        if (user == null) {
+            return;
+        }
         user.reserveField = time; // backup vote time into reserve field, this design seems smell
         List<String> prevSelections = counting.fetchUserSelections(openid);
         if (prevSelections != null) {
