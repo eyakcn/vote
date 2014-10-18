@@ -7,30 +7,30 @@
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
   <style>
     article>details>summary {
-      display: block;
-      font-size: 1.15em;
-      -webkit-margin-before: 0.83em;
-      -webkit-margin-after: 0.83em;
-      -webkit-margin-start: 0px;
-      -webkit-margin-end: 0px;
-      font-weight: bold;
+    display: block;
+    font-size: 1.15em;
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
     }
     section {
-      position: relative;
+    position: relative;
     }
     section>details>summary {
-      display: block;
-      font-size: 1.015em;
-      font-weight: bold;
-      margin: 6px 0px;
+    display: block;
+    font-size: 1.015em;
+    font-weight: bold;
+    margin: 6px 0px;
     }
     section>div {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      width: 30px;
-      height: 40px;
-      z-index: 10;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 30px;
+    height: 40px;
+    z-index: 10;
     }
   </style>
 </head>
@@ -49,6 +49,7 @@
     <details open="true" class="col-xs-12">
       <summary th:text="*{title + ' (' + count + ')'}"></summary>
       <img th:src="*{image}" style="width: 100%;"/>
+
       <p th:text="*{text}"></p>
       <input name="title" type="hidden" th:value="*{title}"/>
       <input name="minSelection" type="hidden" th:value="*{minSelection}"/>
@@ -65,6 +66,7 @@
         <a th:text="*{caption + ' (' + count + ')'}"></a>
       </summary>
       <img th:src="*{image}" style="width: 100%;"/>
+
       <p th:text="*{text}"></p>
     </details>
   </section>

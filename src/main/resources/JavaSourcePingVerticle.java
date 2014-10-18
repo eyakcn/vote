@@ -30,18 +30,18 @@ import org.vertx.java.platform.Verticle;
  */
 public class JavaSourcePingVerticle extends Verticle {
 
-  public void start() {
+    public void start() {
 
 
-    vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
-      @Override
-      public void handle(Message<String> message) {
-        message.reply("pong!");
-        container.logger().info("Sent back pong");
-      }
-    });
+        vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
+            @Override
+            public void handle(Message<String> message) {
+                message.reply("pong!");
+                container.logger().info("Sent back pong");
+            }
+        });
 
-    container.logger().info("PingVerticle started");
+        container.logger().info("PingVerticle started");
 
-  }
+    }
 }

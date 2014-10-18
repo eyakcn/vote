@@ -6,12 +6,12 @@
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <style>
     img{
-      max-width: 100%;
-      height: 300px;
+    max-width: 100%;
+    height: 300px;
     }
     .pic-desc {
-      width: 100%;
-      text-align: center;
+    width: 100%;
+    text-align: center;
     }
     .question {position: relative;}
     .question strong{margin-left: -20px;}
@@ -23,379 +23,389 @@
     div.choice:hover {background-color: rgb(161, 255, 161);}
     .img-link{border: 1px solid; width: 240px; margin-top: 20px; cursor: pointer;}
     #img-preview {
-      position: fixed;
-      top: 150px;
-      left: 300px;
-      width: 400px;
-      height: 400px;
+    position: fixed;
+    top: 150px;
+    left: 300px;
+    width: 400px;
+    height: 400px;
     }
     #img-preview img{
-      width: 100%;
-      height: 100%;
+    width: 100%;
+    height: 100%;
     }
     #admin{position: fixed; top: 0px; right: 0px; width: 100px; height: 40px; cursor: pointer;}
     .question .count {top: 40px; left: -70px; border-radius: 3px;}
     .choice .count {top: 20px; left: 35px; border-radius: 15px; font-size: 15px;}
-    .count{position: absolute; background: rgb(161, 255, 161); color: white; min-width: 20px; text-align: center; padding: 0px 2px;}
+    .count{position: absolute; background: rgb(161, 255, 161); color: white; min-width: 20px; text-align: center;
+    padding: 0px 2px;}
     .count.empty {background-color: rgb(250, 157, 168);}
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="col-md-12">
-    <h1>多言語表示についてのアンケート調査</h1>
-    <p>こんにちは。大阪大学在学中の留学生です。現在、修士論文執筆のために多言語表示についての調査を行っております。お忙しいところ大変恐縮ですが、調査にご協力いただければ幸いです。どうかよろしくお願い申し上げます。(このデータは研究以外の目的に利用することはありません。)  以下のa,b,c,d,e,f の当てはまるものをクリックしてください。</p>
+<div class="col-md-12">
+<h1>多言語表示についてのアンケート調査</h1>
 
-    <div class="question" data-number="1">
-      <div class="row">
-        <strong class="col-md-11">1. 駅の案内情報などが日本語以外の言語で書かれていることをご存知ですか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-3" data-key="a">a. はい</div>
-        <div class="choice col-md-3" data-key="b">b. いいえ</div>
-      </div>
-    </div>
+<p>
+  こんにちは。大阪大学在学中の留学生です。現在、修士論文執筆のために多言語表示についての調査を行っております。お忙しいところ大変恐縮ですが、調査にご協力いただければ幸いです。どうかよろしくお願い申し上げます。(このデータは研究以外の目的に利用することはありません。)
+  以下のa,b,c,d,e,f の当てはまるものをクリックしてください。</p>
 
-    <div class="question" data-number="2">
-      <div class="row">
-        <strong class="col-md-11">2.	表示に日本語以外の言語が使われていることについて、どう思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-1" data-key="a">a. 良い</div>
-        <div class="choice col-md-3" data-key="b">b. どちらかといえば良い</div>
-        <div class="choice col-md-3" data-key="c">c. どちらかといえば良くない</div>
-        <div class="choice col-md-2" data-key="d">d. 良くない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="row" non-admin>
-      <div class="col-md-4">
-        <img src="img/pic1.jpg">
-        <div class="pic-desc">図１</div>
-      </div>
-      <div class="col-md-4">
-        <img src="img/pic2.jpg">
-        <div class="pic-desc">図２</div>
-      </div>
-      <div class="col-md-4">
-        <img src="img/pic3.jpg">
-        <div class="pic-desc">図３</div>
-      </div>
-    </div>
-    <div class="row" non-admin>
-      <div class="col-md-4">
-        <img src="img/pic4.jpg">
-        <div class="pic-desc">図４</div>
-      </div>
-      <div class="col-md-4">
-        <img src="img/pic5.jpg">
-        <div class="pic-desc">図５</div>
-      </div>
-      <div class="col-md-4">
-        <img src="img/pic6.jpg">
-        <div class="pic-desc">図６</div>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic1.jpg">図1についてお聞きします。</div>
-    <div class="question" data-number="3">
-      <div class="row">
-        <strong class="col-md-11">3.	図1のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="4">
-      <div class="row">
-        <strong class="col-md-11">4.	図1のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="5">
-      <div class="row">
-        <strong class="col-md-11">5. 質問4で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic2.jpg">図2についてお聞きします。</div>
-    <div class="question" data-number="6">
-      <div class="row">
-        <strong class="col-md-11">6.	図2のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="7">
-      <div class="row">
-        <strong class="col-md-11">7.	図2のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="8">
-      <div class="row">
-        <strong class="col-md-11">8. 質問7で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic3.jpg">図3についてお聞きします。</div>
-    <div class="question" data-number="9">
-      <div class="row">
-        <strong class="col-md-11">9.	図3のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="10">
-      <div class="row">
-        <strong class="col-md-11">10.	図3のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="11">
-      <div class="row">
-        <strong class="col-md-11">11. 質問10で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic4.jpg">図4についてお聞きします。</div>
-    <div class="question" data-number="12">
-      <div class="row">
-        <strong class="col-md-11">12.	図4のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="13">
-      <div class="row">
-        <strong class="col-md-11">13.	図4のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="14">
-      <div class="row">
-        <strong class="col-md-11">14. 質問13で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic5.jpg">図5についてお聞きします。</div>
-    <div class="question" data-number="15">
-      <div class="row">
-        <strong class="col-md-11">15.	図5のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="16">
-      <div class="row">
-        <strong class="col-md-11">16.	図5のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="17">
-      <div class="row">
-        <strong class="col-md-11">17. 質問16で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-    <div class="img-link" data-src="img/pic6.jpg">図6についてお聞きします。</div>
-    <div class="question" data-number="18">
-      <div class="row">
-        <strong class="col-md-11">18.	図6のように外国語が併記されているのは親切だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="19">
-      <div class="row">
-        <strong class="col-md-11">19.	図6のように外国語が併記されているのは差別的だと思いますか。</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. そう思う</div>
-        <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
-        <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
-        <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
-        <div class="choice col-md-2" data-key="e">e. わからない</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="20">
-      <div class="row">
-        <strong class="col-md-11">20. 質問19で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10"></textarea>
-      </div>
-    </div>
-
-
-    <div style="margin-top: 35px;">最後に、あなたご自身についてお尋ねいたします。</div>
-    <div class="question" data-number="21">
-      <div class="row">
-        <strong class="col-md-11">21.	性別</strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-2" data-key="a">a. 男性</div>
-        <div class="choice col-md-2" data-key="b">b. 女性</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="22">
-      <div class="row">
-        <strong class="col-md-11">22.	年齢 </strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-1" data-key="a">a. ～19</div>
-        <div class="choice col-md-2" data-key="b">b. 20～29</div>
-        <div class="choice col-md-2" data-key="c">c. 30～39</div>
-        <div class="choice col-md-2" data-key="d">d. 40～49</div>
-        <div class="choice col-md-2" data-key="e">e. 50～59</div>
-        <div class="choice col-md-1" data-key="f">f. 60～</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="23">
-      <div class="row">
-        <strong class="col-md-11">23.	職業 </strong>
-        <input maxlength="1" class="answer empty col-md-1" readonly>
-      </div>
-      <div class="row">
-        <div class="choice col-md-1" data-key="a">a. 学生</div>
-        <div class="choice col-md-1" data-key="b">b. 主婦</div>
-        <div class="choice col-md-2" data-key="c">c. 会社員</div>
-        <div class="choice col-md-3" data-key="d">d. アルバイト</div>
-        <div class="choice col-md-3" data-key="e">e. フリーター</div>
-        <div class="choice col-md-2" data-key="f">f. その他</div>
-      </div>
-    </div>
-
-    <div class="question" data-number="24">
-      <div class="row">
-        <strong class="col-md-11">24. 多言語表示のメリットやディメリットについて、ご意見があれば、お聞かせください。</strong>
-      </div>
-      <div class="row">
-        <textarea maxlength="300" class="answer empty col-md-10" rows="4"></textarea>
-      </div>
-    </div>
-
-    <div style="height: 60px;"></div>
-    <div id="submit-btn" class="btn btn-primary btn-lg btn-block" non-admin>提出する</div>
-    <div style="height: 60px;"></div>
+<div class="question" data-number="1">
+  <div class="row">
+    <strong class="col-md-11">1. 駅の案内情報などが日本語以外の言語で書かれていることをご存知ですか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
   </div>
-
-  <div id="img-preview">
-    <img>
+  <div class="row">
+    <div class="choice col-md-3" data-key="a">a. はい</div>
+    <div class="choice col-md-3" data-key="b">b. いいえ</div>
   </div>
+</div>
 
-  <div id="admin">
-    <div style="display: none;">
-      <div id="statistic-btn" class="btn btn-xs">Statistic</div>
-      <input maxlength="5" id="answer-switch" type="number" min="1" style="width: 40px;">
-    </div>
+<div class="question" data-number="2">
+  <div class="row">
+    <strong class="col-md-11">2. 表示に日本語以外の言語が使われていることについて、どう思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
   </div>
+  <div class="row">
+    <div class="choice col-md-1" data-key="a">a. 良い</div>
+    <div class="choice col-md-3" data-key="b">b. どちらかといえば良い</div>
+    <div class="choice col-md-3" data-key="c">c. どちらかといえば良くない</div>
+    <div class="choice col-md-2" data-key="d">d. 良くない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="row" non-admin>
+  <div class="col-md-4">
+    <img src="img/pic1.jpg">
+
+    <div class="pic-desc">図１</div>
+  </div>
+  <div class="col-md-4">
+    <img src="img/pic2.jpg">
+
+    <div class="pic-desc">図２</div>
+  </div>
+  <div class="col-md-4">
+    <img src="img/pic3.jpg">
+
+    <div class="pic-desc">図３</div>
+  </div>
+</div>
+<div class="row" non-admin>
+  <div class="col-md-4">
+    <img src="img/pic4.jpg">
+
+    <div class="pic-desc">図４</div>
+  </div>
+  <div class="col-md-4">
+    <img src="img/pic5.jpg">
+
+    <div class="pic-desc">図５</div>
+  </div>
+  <div class="col-md-4">
+    <img src="img/pic6.jpg">
+
+    <div class="pic-desc">図６</div>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic1.jpg">図1についてお聞きします。</div>
+<div class="question" data-number="3">
+  <div class="row">
+    <strong class="col-md-11">3. 図1のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="4">
+  <div class="row">
+    <strong class="col-md-11">4. 図1のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="5">
+  <div class="row">
+    <strong class="col-md-11">5. 質問4で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic2.jpg">図2についてお聞きします。</div>
+<div class="question" data-number="6">
+  <div class="row">
+    <strong class="col-md-11">6. 図2のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="7">
+  <div class="row">
+    <strong class="col-md-11">7. 図2のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="8">
+  <div class="row">
+    <strong class="col-md-11">8. 質問7で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic3.jpg">図3についてお聞きします。</div>
+<div class="question" data-number="9">
+  <div class="row">
+    <strong class="col-md-11">9. 図3のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="10">
+  <div class="row">
+    <strong class="col-md-11">10. 図3のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="11">
+  <div class="row">
+    <strong class="col-md-11">11. 質問10で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic4.jpg">図4についてお聞きします。</div>
+<div class="question" data-number="12">
+  <div class="row">
+    <strong class="col-md-11">12. 図4のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="13">
+  <div class="row">
+    <strong class="col-md-11">13. 図4のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="14">
+  <div class="row">
+    <strong class="col-md-11">14. 質問13で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic5.jpg">図5についてお聞きします。</div>
+<div class="question" data-number="15">
+  <div class="row">
+    <strong class="col-md-11">15. 図5のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="16">
+  <div class="row">
+    <strong class="col-md-11">16. 図5のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="17">
+  <div class="row">
+    <strong class="col-md-11">17. 質問16で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+<div class="img-link" data-src="img/pic6.jpg">図6についてお聞きします。</div>
+<div class="question" data-number="18">
+  <div class="row">
+    <strong class="col-md-11">18. 図6のように外国語が併記されているのは親切だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="19">
+  <div class="row">
+    <strong class="col-md-11">19. 図6のように外国語が併記されているのは差別的だと思いますか。</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. そう思う</div>
+    <div class="choice col-md-2" data-key="b">b. ややそう思う</div>
+    <div class="choice col-md-3" data-key="c">c. あまりそう思わない</div>
+    <div class="choice col-md-3" data-key="d">d. まったくそう思わない</div>
+    <div class="choice col-md-2" data-key="e">e. わからない</div>
+  </div>
+</div>
+
+<div class="question" data-number="20">
+  <div class="row">
+    <strong class="col-md-11">20. 質問19で、a・bと答えた方にお聞きします。誰に対して差別的だと思いますか。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10"></textarea>
+  </div>
+</div>
+
+
+<div style="margin-top: 35px;">最後に、あなたご自身についてお尋ねいたします。</div>
+<div class="question" data-number="21">
+  <div class="row">
+    <strong class="col-md-11">21. 性別</strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-2" data-key="a">a. 男性</div>
+    <div class="choice col-md-2" data-key="b">b. 女性</div>
+  </div>
+</div>
+
+<div class="question" data-number="22">
+  <div class="row">
+    <strong class="col-md-11">22. 年齢 </strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-1" data-key="a">a. ～19</div>
+    <div class="choice col-md-2" data-key="b">b. 20～29</div>
+    <div class="choice col-md-2" data-key="c">c. 30～39</div>
+    <div class="choice col-md-2" data-key="d">d. 40～49</div>
+    <div class="choice col-md-2" data-key="e">e. 50～59</div>
+    <div class="choice col-md-1" data-key="f">f. 60～</div>
+  </div>
+</div>
+
+<div class="question" data-number="23">
+  <div class="row">
+    <strong class="col-md-11">23. 職業 </strong>
+    <input maxlength="1" class="answer empty col-md-1" readonly>
+  </div>
+  <div class="row">
+    <div class="choice col-md-1" data-key="a">a. 学生</div>
+    <div class="choice col-md-1" data-key="b">b. 主婦</div>
+    <div class="choice col-md-2" data-key="c">c. 会社員</div>
+    <div class="choice col-md-3" data-key="d">d. アルバイト</div>
+    <div class="choice col-md-3" data-key="e">e. フリーター</div>
+    <div class="choice col-md-2" data-key="f">f. その他</div>
+  </div>
+</div>
+
+<div class="question" data-number="24">
+  <div class="row">
+    <strong class="col-md-11">24. 多言語表示のメリットやディメリットについて、ご意見があれば、お聞かせください。</strong>
+  </div>
+  <div class="row">
+    <textarea maxlength="300" class="answer empty col-md-10" rows="4"></textarea>
+  </div>
+</div>
+
+<div style="height: 60px;"></div>
+<div id="submit-btn" class="btn btn-primary btn-lg btn-block" non-admin>提出する</div>
+<div style="height: 60px;"></div>
+</div>
+
+<div id="img-preview">
+  <img>
+</div>
+
+<div id="admin">
+  <div style="display: none;">
+    <div id="statistic-btn" class="btn btn-xs">Statistic</div>
+    <input maxlength="5" id="answer-switch" type="number" min="1" style="width: 40px;">
+  </div>
+</div>
 </div>
 
 </body>

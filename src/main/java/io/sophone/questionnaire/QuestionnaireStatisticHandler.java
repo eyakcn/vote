@@ -15,62 +15,19 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by eyakcn on 2014/10/14.
  */
 public class QuestionnaireStatisticHandler extends Middleware {
-    private static final String delimiter = " | ";
-    private static final String baseDir = System.getProperty("user.home") + "/";
-    private static final String answerFilePath = baseDir + "questionnaire.txt";
-    private static final List<Map<String, Integer>> statistic = new ArrayList<>();
-    private static final List<List<String>> parsedAnswers = new ArrayList<>();
-
-    static {
-        File answerFile = new File(answerFilePath);
-        try {
-            if (answerFile.exists()) {
-                List<String> lines = Files.readAllLines(answerFile.toPath());
-                lines.forEach(line -> analyzeLine(line));
-            } else {
-                answerFile.createNewFile();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private static Container container;
 
     public static void setContainer(Container container_) {
         container = container_;
-    }
-
-    private static void analyzeLine(String line) {
-        if (line == null || line.length() == 0) {
-            return;
-        }
-        String[] answers = StringUtils.splitByWholeSeparatorPreserveAllTokens(line, delimiter);
-        for (int i = 0; i < answers.length; i++) {
-            String answer = answers[i];
-
-            Map<String, Integer> answerMap = null;
-            if (statistic.size() == i) {
-                answerMap = new LinkedHashMap<>(6); // at most 6 choices
-                statistic.add(answerMap);
-            } else {
-                answerMap = statistic.get(i);
-            }
-
-            if (answerMap.containsKey(answer)) {
-                Integer count = answerMap.get(answer);
-                answerMap.put(answer, ++count);
-            } else {
-                answerMap.put(answer, 1);
-            }
-        }
-        parsedAnswers.add(Arrays.asList(answers));
     }
 
     @Override
@@ -104,15 +61,15 @@ public class QuestionnaireStatisticHandler extends Middleware {
             return;
         }
         List<String> answers = ((JsonArray) request.body()).toList();
-        String line = StringUtils.join(answers, delimiter);
-        analyzeLine(line);
+        String line = StringUtils.join(answers, Context.delimiter);
+        Context.analyzeLine(line);
 
         List<String> lines = new ArrayList<String>();
         lines.add(line);
-        File answerFile = new File(answerFilePath);
+        File answerFile = new File(Context.answerFilePath);
         try {
             Files.write(answerFile.toPath(), lines, StandardOpenOption.APPEND);
-            container.logger().info("New answer add to: " + answerFilePath);
+            container.logger().info("New answer add to: " + Context.answerFilePath);
         } catch (IOException e) {
             container.logger().error("Failed to write answers file!" + e.toString());
         }
@@ -132,8 +89,8 @@ public class QuestionnaireStatisticHandler extends Middleware {
 
     private void handleGet(YokeRequest request, Handler<Object> next) {
         GetResult returnVal = new GetResult();
-        returnVal.statistic = statistic;
-        returnVal.answers = parsedAnswers;
+        returnVal.statistic = Context.statistic;
+        returnVal.answers = Context.parsedAnswers;
         Gson gson = new GsonBuilder().create();
         String content = gson.toJson(returnVal);
         container.logger().info("Get Result: " + content);

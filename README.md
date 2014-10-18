@@ -1,9 +1,14 @@
-# Vert.x Example Maven Project
+# COMEARLY Web Application
 
-Example project for creating a Vert.x module with a Gradle build.
+Currently used as Wechat vote server.
 
-By default this module contains a simple Java verticle which listens on the event bus and responds to `ping!`
-messages with `pong!`.
+## Requirements
 
-This example also shows you how to write tests in Java, Groovy, Ruby and Python
-
+ - create identity.json under user home path (~/wechat/)
+ 
+```javascript 
+{
+  "appid": "???",
+  "secret": "???"
+}
+```

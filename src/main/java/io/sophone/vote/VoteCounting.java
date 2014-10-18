@@ -11,12 +11,12 @@ import java.util.Map;
  */
 public class VoteCounting {
     private final String title;
+    private final Map<String, List<String>> userSelectionsMap = new HashMap<>();
+    private final Map<String, Map<String, SnsUser>> selectionUsersMap = new HashMap<>();
 
     public VoteCounting(String title) {
         this.title = title;
     }
-
-    private final Map<String, List<String>> userSelectionsMap = new HashMap<>();
 
     public List<String> fetchUserSelections(String openid) {
         return userSelectionsMap.get(openid);
@@ -25,8 +25,6 @@ public class VoteCounting {
     public void recordUserSelections(String openid, List<String> selections) {
         userSelectionsMap.put(openid, selections);
     }
-
-    private final Map<String, Map<String, SnsUser>> selectionUsersMap = new HashMap<>();
 
     public void removeUserFromSelections(List<String> selections, String openid) {
         for (String selection : selections) {

@@ -26,18 +26,18 @@ This is a simple Java verticle which receives `ping` messages on the event bus a
  */
 public class PingVerticle extends Verticle {
 
-  public void start() {
+    public void start() {
 
 
-    vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
-      @Override
-      public void handle(Message<String> message) {
-        message.reply("pong!");
-        container.logger().info("Sent back pong");
-      }
-    });
+        vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
+            @Override
+            public void handle(Message<String> message) {
+                message.reply("pong!");
+                container.logger().info("Sent back pong");
+            }
+        });
 
-    container.logger().info("PingVerticle started");
+        container.logger().info("PingVerticle started");
 
-  }
+    }
 }
