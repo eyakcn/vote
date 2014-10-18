@@ -56,10 +56,11 @@ public class WechatVoteHandler extends Middleware {
     private static final String baseDir = System.getProperty("user.home") + "/";
     private static final String userFilePath = baseDir + "wechat_users.txt";
     private static final String answerFilePath = baseDir + "vote_history.txt";
+    private static final String contentFilePath = baseDir + "vote_content.txt";
 
     private static final Map<String, SnsUser> userMap = new HashMap<>();
 
-    private static final VoteContent voteContent;
+    private static VoteContent voteContent;
 
     static {
         File userFile = new File(userFilePath);
@@ -87,6 +88,20 @@ public class WechatVoteHandler extends Middleware {
                 });
             } else {
                 answerFile.createNewFile();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        File contentFile = new File(contentFilePath);
+        try {
+            if (contentFile.exists()) {
+                List<String> lines = Files.readAllLines(contentFile.toPath());
+                lines.forEach(line -> {
+                    analyzeVoteContent(line); // need userMap prepared
+                });
+            } else {
+                contentFile.createNewFile();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -149,7 +164,6 @@ public class WechatVoteHandler extends Middleware {
         String code = request.getParameter("code");
 //        String state = request.getParameter("state");
 
-        // TODO load vote content from file
         request.put("content", voteContent);
 
         if (code != null) {
@@ -248,5 +262,12 @@ public class WechatVoteHandler extends Middleware {
 
         counting.addUserToSelections(selections, user);
         counting.recordUserSelections(openid, selections);
+    }
+
+    private static final Map<String, VoteContent> voteContentMap = new HashMap<>();
+
+    private static void analyzeVoteContent(String line) {
+        VoteContent content = Json.decodeValue(line, VoteContent.class);
+        voteContentMap.put(content.title, content);
     }
 }
