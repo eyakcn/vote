@@ -24,17 +24,17 @@ import org.vertx.testtools.TestVerticleInfo;
 
 /**
  * This is dummy JUnit test class which is used to run any Python test scripts as JUnit tests.
- *
+ * <p/>
  * The scripts by default go in src/test/resources.
- *
+ * <p/>
  * If you don't have any Python tests in your project you can delete this
- *
+ * <p/>
  * Do need to edit this file unless you want it to look for tests elsewhere
  */
-@TestVerticleInfo(filenameFilter=".+\\.py", funcRegex="def[\\s]+(test[^\\s(]+)")
+@TestVerticleInfo(filenameFilter = ".+\\.py", funcRegex = "def[\\s]+(test[^\\s(]+)")
 @RunWith(ScriptClassRunner.class)
 public class PythonIntegrationTests {
-  @Test
-  public void __vertxDummy() {
-  }
+    @Test
+    public void __vertxDummy() {
+    }
 }

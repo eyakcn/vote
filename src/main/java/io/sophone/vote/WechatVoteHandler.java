@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -74,7 +75,9 @@ public class WechatVoteHandler extends Middleware {
         String code = request.getParameter("code");
 //        String state = request.getParameter("state");
 
-        request.put("content", Context.voteContent);
+        Collection<VoteContent> contents = Context.voteContentMap.values();
+        VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
+        request.put("content", content);
 
         if (code != null) {
             final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);

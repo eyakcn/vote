@@ -22,10 +22,10 @@ import org.junit.Test;
  */
 public class ExampleUnitTest {
 
-  @Test
-  public void testVerticle() {
-    PingVerticle vert = new PingVerticle();
+    @Test
+    public void testVerticle() {
+        PingVerticle vert = new PingVerticle();
 
-    // do something with verticle
-  }
+        // do something with verticle
+    }
 }

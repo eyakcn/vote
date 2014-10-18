@@ -18,11 +18,10 @@ class Context {
     static final Map<String, SnsUser> userMap = new HashMap<>();
     static final Map<String, VoteCounting> voteCountingMap = new HashMap<>();
     static final Map<String, VoteContent> voteContentMap = new HashMap<>();
-    private static final String baseDir = System.getProperty("user.home") + "/wechat/vote/";
+    static final String baseDir = System.getProperty("user.home") + "/wechat/vote/";
     static final String userFilePath = baseDir + "vote_users.txt";
     static final String answerFilePath = baseDir + "vote_history.txt";
     static final String contentFilePath = baseDir + "vote_content.txt";
-    static VoteContent voteContent;
 
     static {
         File baseDirFile = new File(baseDir);
@@ -31,33 +30,6 @@ class Context {
         loadUserFile();
         loadAnswerFile();
         loadContentFile();
-
-
-        voteContent = new VoteContent();
-        voteContent.title = "最受欢迎实践队伍";
-        voteContent.text = "经过华东政法大学第一届社会实践大赛初赛，18支优秀实践队伍脱颖而出进入决赛，同事角逐。。。";
-        voteContent.count = 146;
-
-        VoteCandidate candidate1 = new VoteCandidate();
-        candidate1.caption = "A组1号";
-        candidate1.text = "队伍简介：典当行业这个古老行业。。。";
-        candidate1.count = 20;
-        voteContent.candidates.add(candidate1);
-        VoteCandidate candidate2 = new VoteCandidate();
-        candidate2.caption = "A组2号";
-        candidate2.text = "队伍简介：典当行业这个古老行业。。。";
-        candidate2.count = 13;
-        voteContent.candidates.add(candidate2);
-        VoteCandidate candidate3 = new VoteCandidate();
-        candidate3.caption = "A组3号";
-        candidate3.text = "队伍简介：典当行业这个古老行业。。。";
-        candidate3.count = 33;
-        voteContent.candidates.add(candidate3);
-        VoteCandidate candidate4 = new VoteCandidate();
-        candidate4.caption = "A组4号";
-        candidate4.text = "队伍简介：典当行业这个古老行业。。。";
-        candidate4.count = 22;
-        voteContent.candidates.add(candidate4);
     }
 
     private static void loadContentFile() {

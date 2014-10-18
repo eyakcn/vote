@@ -11,12 +11,11 @@ import java.nio.file.Files;
  */
 public class Config {
     public static final Identity wechatId;
+    private static final String baseDir = System.getProperty("user.home") + "/wechat/";
 
     static {
         wechatId = loadIdentity();
     }
-
-    private static final String baseDir = System.getProperty("user.home") + "/wechat/";
 
     private static Identity loadIdentity() {
         // Init Wechat app identity
