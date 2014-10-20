@@ -152,7 +152,9 @@ public class WechatVoteHandler extends Middleware {
             }));
             tokenReq.end();
         } else {
-            request.put("user", new SnsUser());
+            SnsUser user = new SnsUser();
+            user.nickname = request.ip();
+            request.put("user", user);
             request.response().render("vote.html");
         }
     }
@@ -160,6 +162,11 @@ public class WechatVoteHandler extends Middleware {
     private VoteContent getVoteContent() {
         Collection<VoteContent> contents = Context.voteContentMap.values();
         VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
+        VoteCounting voteCounting = Context.voteCountingMap.get(content.title);
+        content.count = voteCounting.usersCount();
+        for (VoteCandidate candidate : content.candidates) {
+            candidate.count = voteCounting.usersCountOf(candidate.caption);
+        }
         return content;
     }
 

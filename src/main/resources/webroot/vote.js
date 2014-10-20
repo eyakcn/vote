@@ -21,6 +21,7 @@ $(function() {
       alert('您当前选择不足！');
       return;
     }
+    $('#submit').prop('disabled', true);
 
     var result = {};
     result.openid = openid;
@@ -40,10 +41,11 @@ $(function() {
       contentType: "application/json; charset=utf-8",
       dataType: "json",
       success: function() {
-        confirm("已提交，谢谢参与！");
+        $('#submit').prop('disabled', false);
+//        confirm("已提交，谢谢参与！");
       },
-      error: function() {
-        confirm("提交失败，请重试！");
+      error: function(e) {
+//        confirm("提交失败，请重试！");
       }
     });
   });
@@ -51,6 +53,21 @@ $(function() {
   var source = new EventSource("vote");
   source.addEventListener('message', function(e) {
     console.log(e.data);
+    var counting = JSON.parse(e.data);
+
+    var $title = $('article>details>summary');
+    var oldTitle = $title.text();
+    var newTitle = oldTitle.replace(/\(参与人数：\d+\)/g, '(参与人数：'+counting['total']+')');
+    $title.text(newTitle);
+
+    $('section>details>summary').each(function() {
+      var $caption = $('a', this);
+      var oldCaption = $caption.text();
+      var pureCaption = oldCaption.replace(/\(票数：\d+\)/g, '');
+      var newCaption = oldCaption.replace(/\(票数：\d+\)/g, '(票数：'+counting[pureCaption]+')');
+      $caption.text(newCaption);
+    });
+
   }, false);
 
   source.addEventListener('open', function(e) {

@@ -47,7 +47,8 @@
   </div>
   <article id="content" th:object="${content}" class="row">
     <details open="true" class="col-xs-12">
-      <summary th:text="*{title + ' (' + count + ')'}"></summary>
+      <summary th:text="*{title + '(参与人数：' + count + ')'}"></summary>
+      <p th:text="${'欢迎您投票：' + user.nickname}"></p>
       <img th:src="*{image}" style="width: 100%;"/>
 
       <p th:text="*{text}"></p>
@@ -63,7 +64,7 @@
     </div>
     <details th:object="${candidate}" class="col-xs-12">
       <summary>
-        <a th:text="*{caption + ' (' + count + ')'}"></a>
+        <a th:text="*{caption + '(票数：' + count + ')'}"></a>
       </summary>
       <img th:src="*{image}" style="width: 100%;"/>
 
