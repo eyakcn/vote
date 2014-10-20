@@ -47,4 +47,19 @@ $(function() {
       }
     });
   });
+
+  var source = new EventSource("vote");
+  source.addEventListener('message', function(e) {
+    console.log(e.data);
+  }, false);
+
+  source.addEventListener('open', function(e) {
+    console.log("EventSource connection open.")
+  }, false);
+
+  source.addEventListener('error', function(e) {
+    if (e.readyState == EventSource.CLOSED) {
+      console.log("EventSource connection closed.")
+    }
+  }, false);
 });

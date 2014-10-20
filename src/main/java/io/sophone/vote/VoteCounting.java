@@ -2,9 +2,7 @@ package io.sophone.vote;
 
 import io.sophone.wechat.SnsUser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by eyakcn on 2014/10/15.
@@ -13,6 +11,7 @@ public class VoteCounting {
     private final String title;
     private final Map<String, List<String>> userSelectionsMap = new HashMap<>();
     private final Map<String, Map<String, SnsUser>> selectionUsersMap = new HashMap<>();
+    private final Set<SnsUser> userSet = new HashSet<>();
 
     public VoteCounting(String title) {
         this.title = title;
@@ -44,5 +43,20 @@ public class VoteCounting {
             }
             usersMap.put(user.openid, user);
         }
+    }
+
+    public void recordUser(SnsUser user) {
+        if (Objects.nonNull(user)) {
+            userSet.add(user);
+        }
+    }
+
+    public int usersCount() {
+        return userSet.size();
+    }
+
+    public int usersCountOf(String caption) {
+        Map<String, SnsUser> userMap = selectionUsersMap.get(caption);
+        return Objects.isNull(userMap) ? 0 : userMap.size();
     }
 }

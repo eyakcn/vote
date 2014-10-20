@@ -1,6 +1,8 @@
 package io.sophone.vote;
 
+import com.jetdrone.vertx.yoke.core.JSON;
 import io.sophone.wechat.SnsUser;
+import org.apache.commons.lang3.StringUtils;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.json.impl.Json;
 
@@ -54,7 +56,7 @@ class Context {
             if (answerFile.exists()) {
                 List<String> lines = Files.readAllLines(answerFile.toPath());
                 lines.forEach(line -> {
-                    JsonObject answer = Json.decodeValue(line, JsonObject.class);
+                    JsonObject answer = new JsonObject(JSON.<Map>decode(line));
                     analyzeAnswer(answer); // need userMap prepared
                 });
             } else {
@@ -84,7 +86,7 @@ class Context {
 
     static void analyzeAnswer(JsonObject answer) {
         String openid = answer.getString("openid");
-        if (openid == null) {
+        if (StringUtils.isBlank(openid)) {
             return;
         }
         String title = answer.getString("title");
@@ -99,7 +101,10 @@ class Context {
 
         SnsUser user = userMap.get(openid);
         if (user == null) {
-            return;
+            user = new SnsUser();
+            user.openid = openid;
+            user.nickname = openid;
+            userMap.put(openid, user);
         }
         user.reserveField = time; // backup vote time into reserve field, this design seems smell
         List<String> prevSelections = counting.fetchUserSelections(openid);
@@ -109,6 +114,7 @@ class Context {
 
         counting.addUserToSelections(selections, user);
         counting.recordUserSelections(openid, selections);
+        counting.recordUser(user);
     }
 
     private static void analyzeVoteContent(String line) {
