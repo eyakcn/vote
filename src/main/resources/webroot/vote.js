@@ -56,7 +56,7 @@ $(function() {
     console.log(e.data);
     var counting = JSON.parse(e.data);
 
-    var $title = $('article>details>summary');
+    var $title = $('article>details>summary>a');
     var oldTitle = $title.text();
     var newTitle = oldTitle.replace(/\(参与人数：\d+\)/g, '(参与人数：'+counting['total']+')');
     $title.text(newTitle);

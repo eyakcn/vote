@@ -48,9 +48,11 @@
   <article id="content" th:object="${content}" class="row">
     <input name="id" type="hidden" th:value="*{id}"/>
     <details open="true" class="col-xs-12">
-      <summary th:text="*{title + '(参与人数：' + count + ')'}"></summary>
+      <summary>
+        <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
+        <img th:if="*{image}" th:src="*{'/files/wechat/vote/image/' + image}" style="width: 100%;"/>
+      </summary>
       <p th:text="${'欢迎您投票：' + user.nickname}"></p>
-      <img th:src="*{image}" style="width: 100%;"/>
 
       <p th:text="*{text}"></p>
       <input name="title" type="hidden" th:value="*{title}"/>
@@ -66,8 +68,11 @@
     <details th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
+        <audio controls="true" th:if="*{audio}">
+          <source th:src="*{'/files/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
+        </audio>
+        <img th:if="*{image}" th:src="*{'/files/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
-      <img th:src="*{image}" style="width: 100%;"/>
 
       <p th:text="*{text}"></p>
     </details>

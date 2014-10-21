@@ -31,6 +31,7 @@ public class Main extends Verticle {
         app.use("/wechat/vote", new WechatVoteHandler());
         app.use("/osaka/counting", new QuestionnaireStatisticHandler());
         app.use("/webroot", new Static("webroot", 0, true, false));
+        app.use("/files/wechat", new Static("~/wechat", 0, true, false));
         app.listen(8181);
     }
 }
