@@ -21,9 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by eyakcn on 2014/10/13.
@@ -31,7 +29,7 @@ import java.util.List;
 public class WechatVoteHandler extends Middleware {
     private static final String TOKEN_URL = "/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
     private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
-    private static final List<YokeRequest> countingRequests = new ArrayList<>();
+    private static final Map<String, Map<String, YokeRequest>> countingRequestsMap = new HashMap<>();
     private static HttpClient httpClient;
     private static Container container;
 
@@ -55,7 +53,16 @@ public class WechatVoteHandler extends Middleware {
             case "GET":
                 String accept = request.getHeader("accept");
                 if ("text/event-stream".equals(accept)) {
-                    countingRequests.add(request);
+                    String contentId = request.getParameter("content-id");
+                    String openid = request.getParameter("openid", request.ip());
+                    if (Objects.nonNull(contentId)) {
+                        Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
+                        if (Objects.isNull(countingRequests)) {
+                            countingRequests = new HashMap<>();
+                            countingRequestsMap.put(contentId, countingRequests);
+                        }
+                        countingRequests.put(openid, request);
+                    }
                 } else {
                     handleGetContent(request, next);
                 }
@@ -80,18 +87,18 @@ public class WechatVoteHandler extends Middleware {
         }
     }
 
-    private void refreshCounting() {
-        JsonObject countingResult = new JsonObject();
-        VoteContent voteContent = getVoteContent();
-        VoteCounting voteCounting = Context.voteCountingMap.get(voteContent.title);
-        countingResult.putNumber("total", voteCounting.usersCount());
+    private void refreshCounting(String contentId) {
+        VoteContent voteContent = getVoteContent(contentId);
 
+        JsonObject countingResult = new JsonObject();
+        countingResult.putNumber("total", voteContent.count);
         for (VoteCandidate candidate : voteContent.candidates) {
-            countingResult.putNumber(candidate.caption, voteCounting.usersCountOf(candidate.caption));
+            countingResult.putNumber(candidate.caption, candidate.count);
         }
 
         String responseText = "data: " + countingResult.encode() + "\n\n";
-        for (YokeRequest request : countingRequests) {
+        for (YokeRequest request : countingRequestsMap.get(contentId).values()) {
+            // TODO how to test whether connection is alive?
             writeSseMessage(request.response(), responseText);
         }
     }
@@ -108,10 +115,11 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void handleGetContent(YokeRequest request, Handler<Object> next) {
+        String contentId = request.getParameter("content-id", "");
         String code = request.getParameter("code");
 //        String state = request.getParameter("state");
 
-        VoteContent content = getVoteContent();
+        VoteContent content = getVoteContent(contentId);
         request.put("content", content);
 
         if (code != null) {
@@ -159,21 +167,36 @@ public class WechatVoteHandler extends Middleware {
         }
     }
 
-    private VoteContent getVoteContent() {
+    private VoteContent getVoteContent(String contentId) {
+        if (Objects.nonNull(contentId)) {
+            VoteContent existContent = Context.voteContentMap.get(contentId);
+            if (Objects.nonNull(existContent)) {
+                setCountingInfo(existContent);
+                return existContent;
+            }
+        }
         Collection<VoteContent> contents = Context.voteContentMap.values();
         VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
+        setCountingInfo(content);
+        return content;
+    }
+
+    private void setCountingInfo(VoteContent content) {
         VoteCounting voteCounting = Context.voteCountingMap.get(content.title);
+        if (Objects.isNull(voteCounting)) {
+            return;
+        }
         content.count = voteCounting.usersCount();
         for (VoteCandidate candidate : content.candidates) {
             candidate.count = voteCounting.usersCountOf(candidate.caption);
         }
-        return content;
     }
 
     private void handlePost(YokeRequest request, Handler<Object> next) {
         if (request.body() == null) {
             return;
         }
+        String contentId = request.getParameter("content-id", "");
         JsonObject answer = request.<JsonObject>body();
         if (StringUtils.isBlank(answer.getString("openid"))) {
             answer.putString("openid", request.ip());
@@ -191,6 +214,8 @@ public class WechatVoteHandler extends Middleware {
             container.logger().error("Failed to write answers file!" + e.toString());
         }
         request.response().end("true");
-        refreshCounting();
+
+        // Server Send Event
+        refreshCounting(contentId);
     }
 }

@@ -119,7 +119,7 @@ class Context {
 
     private static void analyzeVoteContent(String line) {
         VoteContent content = Json.decodeValue(line, VoteContent.class);
-        voteContentMap.put(content.title, content);
+        voteContentMap.put(content.id, content);
     }
 
 }

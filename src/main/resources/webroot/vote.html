@@ -46,6 +46,7 @@
     <input name="headimgurl" type="hidden" th:value="*{headimgurl}"/>
   </div>
   <article id="content" th:object="${content}" class="row">
+    <input name="id" type="hidden" th:value="*{id}"/>
     <details open="true" class="col-xs-12">
       <summary th:text="*{title + '(参与人数：' + count + ')'}"></summary>
       <p th:text="${'欢迎您投票：' + user.nickname}"></p>

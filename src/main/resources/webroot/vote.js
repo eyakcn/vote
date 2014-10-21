@@ -1,4 +1,5 @@
 $(function() {
+  var contentid = $('#content>input[name="id"]').val();
   var openid = $('#user>input[name="openid"]').val();
   var title = $('#content input[name="title"]').val();
   var minSelection = $('#content input[name="minSelection"]').val();
@@ -35,7 +36,7 @@ $(function() {
     });
 
     $.ajax({
-      url: $(location).attr('pathname'),
+      url: $(location).attr('pathname') + "?content-id=" + contentid,
       type: "POST",
       data: JSON.stringify(result),
       contentType: "application/json; charset=utf-8",
@@ -50,7 +51,7 @@ $(function() {
     });
   });
 
-  var source = new EventSource("vote");
+  var source = new EventSource('vote?content-id=' + contentid + '&openid=' + openid);
   source.addEventListener('message', function(e) {
     console.log(e.data);
     var counting = JSON.parse(e.data);
