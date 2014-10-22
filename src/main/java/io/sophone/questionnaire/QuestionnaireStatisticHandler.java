@@ -58,6 +58,7 @@ public class QuestionnaireStatisticHandler extends Middleware {
 
     private void handlePost(YokeRequest request, Handler<Object> next) {
         if (request.body() == null) {
+            next.handle(null);
             return;
         }
         List<String> answers = ((JsonArray) request.body()).toList();
@@ -99,7 +100,7 @@ public class QuestionnaireStatisticHandler extends Middleware {
         try {
             request.response().putHeader("Content-Length", "" + content.getBytes("UTF-8").length);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            next.handle(e);
         }
         request.response().write(content);
         request.response().end();

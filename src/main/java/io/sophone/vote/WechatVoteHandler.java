@@ -194,6 +194,7 @@ public class WechatVoteHandler extends Middleware {
 
     private void handlePost(YokeRequest request, Handler<Object> next) {
         if (request.body() == null) {
+            next.handle(null);
             return;
         }
         String contentId = request.getParameter("content-id", "");
