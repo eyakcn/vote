@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.sophone.engine;
+package io.sophone.override;
 
 import com.jetdrone.vertx.yoke.Engine;
 import com.jetdrone.vertx.yoke.core.YokeAsyncResult;
@@ -61,6 +61,7 @@ public class ThymeleafEngine implements Engine {
         // XHTML is the default mode, but we will set it anyway for better understanding of code
         templateResolver.setTemplateMode("HTML5");
         templateResolver.setPrefix(prefix);
+        templateResolver.setCharacterEncoding("UTF-8");
     }
 
     @Override
@@ -99,7 +100,7 @@ public class ThymeleafEngine implements Engine {
         });
 
         engine.setTemplateResolver(templateResolver);
-//        engine.setMessageResolver(new IMessageResolver() {
+//        override.setMessageResolver(new IMessageResolver() {
 //            @Override
 //            public String getName() {
 //                return "Yoke/Thymeleaf";

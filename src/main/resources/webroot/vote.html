@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head lang="en">
+<head lang="zh-Hans">
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>华政刑司家园</title>
@@ -50,7 +50,7 @@
     <details open="true" class="col-xs-12">
       <summary>
         <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
-        <img th:if="*{image}" th:src="*{'/sysroot/vote/image/' + image}" style="width: 100%;"/>
+        <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
       <p th:text="${'欢迎您投票：' + user.nickname}"></p>
 
@@ -68,10 +68,13 @@
     <details th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
-        <audio controls="true" th:if="*{audio}">
-          <source th:src="*{'/sysroot/vote/audio/' + audio}" type="audio/mpeg"/>
+        <audio preload="true" controls="true" th:if="*{audio}">
+          <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
         </audio>
-        <img th:if="*{image}" th:src="*{'/sysroot/vote/image/' + image}" style="width: 100%;"/>
+        <video webkit-playsinline="true" preload="true" controls="true" th:if="*{video}">
+          <source th:src="*{'/sysroot/wechat/vote/video/' + video}" type="video/mp4"/>
+        </video>
+        <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
 
       <p th:text="*{text}"></p>

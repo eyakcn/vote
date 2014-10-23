@@ -7,6 +7,7 @@ public class VoteCandidate {
     public String caption = "(Empty Caption)";
     public String image;
     public String audio;
+    public String video;
     public String text;
     public int count;
 }

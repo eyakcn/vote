@@ -209,6 +209,9 @@
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>${maven.resources.plugin.version}</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
         <executions>
           <execution>
             <id>copy-mod-to-target</id>
