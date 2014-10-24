@@ -68,10 +68,10 @@
     <details th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
-        <audio preload="true" controls="true" th:if="*{audio}">
+        <audio preload="false" controls="true" th:if="*{audio}">
           <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
         </audio>
-        <video webkit-playsinline="true" preload="true" controls="true" th:if="*{video}">
+        <video width="100%" webkit-playsinline="true" preload="false" controls="true" th:if="*{video}">
           <source th:src="*{'/sysroot/wechat/vote/video/' + video}" type="video/mp4"/>
         </video>
         <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
