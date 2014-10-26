@@ -7,6 +7,7 @@ import com.jetdrone.vertx.yoke.middleware.Limit;
 import io.sophone.override.Static;
 import io.sophone.override.ThymeleafEngine;
 import io.sophone.questionnaire.QuestionnaireStatisticHandler;
+import io.sophone.vote.WechatVoteBulletinHandler;
 import io.sophone.vote.WechatVoteHandler;
 import org.vertx.java.platform.Verticle;
 
@@ -29,6 +30,7 @@ public class Main extends Verticle {
         app.use(new Limit(4096));
         app.use(new BodyParser());
         app.use("/wechat/vote", new WechatVoteHandler());
+        app.use("/wechat/bulletin/vote", new WechatVoteBulletinHandler());
         app.use("/osaka/counting", new QuestionnaireStatisticHandler());
         app.use("/webroot/", new Static("webroot/", 0));
         app.use("/sysroot/", new Static(System.getProperty("user.home") + "/", 0));

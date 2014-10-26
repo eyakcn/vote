@@ -92,7 +92,7 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
-        List<VoteContent> contents = getVoteContentList();
+        List<VoteContent> contents = Context.getVoteContentList();
         request.put("contents", contents);
 
         String code = request.getParameter("code");
@@ -156,7 +156,7 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void refreshCounting(String contentId) {
-        VoteContent voteContent = getVoteContent(contentId);
+        VoteContent voteContent = Context.getVoteContent(contentId);
 
         JsonObject countingResult = new JsonObject();
         countingResult.putNumber("total", voteContent.count);
@@ -187,7 +187,7 @@ public class WechatVoteHandler extends Middleware {
         String contentId = request.getParameter("content-id");
         Objects.requireNonNull(contentId);
 
-        VoteContent content = getVoteContent(contentId);
+        VoteContent content = Context.getVoteContent(contentId);
         request.put("content", content);
 
         String openid = request.getParameter("openid", request.ip());
@@ -197,39 +197,10 @@ public class WechatVoteHandler extends Middleware {
         request.response().render("wechat/vote/detail.html");
     }
 
-    private VoteContent getVoteContent(String contentId) {
-        if (Objects.nonNull(contentId)) {
-            VoteContent existContent = Context.voteContentMap.get(contentId);
-            if (Objects.nonNull(existContent)) {
-                setCountingInfo(existContent);
-                return existContent;
-            }
-        }
-        Collection<VoteContent> contents = Context.voteContentMap.values();
-        VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
-        setCountingInfo(content);
-        return content;
-    }
-
-    private List<VoteContent> getVoteContentList() {
-        return new ArrayList<>(Context.voteContentMap.values());
-    }
-
-    private void setCountingInfo(VoteContent content) {
-        VoteCounting voteCounting = Context.voteCountingMap.get(content.id);
-        if (Objects.isNull(voteCounting)) {
-            return;
-        }
-        content.count = voteCounting.usersCount();
-        for (VoteCandidate candidate : content.candidates) {
-            candidate.count = voteCounting.usersCountOf(candidate.caption);
-        }
-    }
-
     private void handlePost(YokeRequest request, Handler<Object> next) {
         String contentId = request.getParameter("content-id");
         Objects.requireNonNull(contentId);
-        VoteContent content = getVoteContent(contentId);
+        VoteContent content = Context.getVoteContent(contentId);
 
         JsonObject answer = request.<JsonObject>body();
         Objects.requireNonNull(answer);

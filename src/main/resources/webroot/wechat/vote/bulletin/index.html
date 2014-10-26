@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="zh-Hans">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>华政刑司家园</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="list-group">
+    <th:block th:each="content : ${contents}">
+      <a th:href="${'/wechat/bulletin/vote?content-id=' + content.id}">
+        <h4 class="list-group-item-heading" th:text="${'［编号: ' + content.id + '］' + content.title}"></h4>
+      </a>
+    </th:block>
+  </div>
+</div>
+</body>
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+</html>

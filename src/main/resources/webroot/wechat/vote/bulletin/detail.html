@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="zh-Hans">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>华政刑司家园</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+  <style>
+    article>details>summary {
+    display: block;
+    font-size: 1.15em;
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
+    }
+    section {
+    position: relative;
+    }
+    section>details>summary {
+    display: block;
+    font-size: 1.015em;
+    font-weight: bold;
+    margin: 6px 0px;
+    }
+    section>div {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 30px;
+    height: 40px;
+    z-index: 10;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <article id="content" th:object="${content}" class="row">
+    <input name="id" type="hidden" th:value="*{id}"/>
+    <details open="true" class="col-xs-12">
+      <summary>
+        <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
+      </summary>
+    </details>
+  </article>
+  <section th:each="candidate : ${content.candidates}" class="row">
+    <details th:object="${candidate}" class="col-xs-12">
+      <summary>
+        <a th:text="*{caption + '(票数：' + count + ')'}"></a>
+      </summary>
+
+      <p th:text="${votersMap.get(candidate.caption)}"></p>
+    </details>
+  </section>
+</div>
+</body>
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+</html>

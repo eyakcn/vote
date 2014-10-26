@@ -9,58 +9,63 @@ import java.util.*;
  */
 public class VoteCounting {
     private final String id;
-    private final Map<String, List<String>> userSelectionsMap = new HashMap<>();
-    private final Map<String, Map<String, SnsUser>> selectionUsersMap = new HashMap<>();
-    private final Set<SnsUser> userSet = new HashSet<>();
+    private final Map<String, List<String>> voterChoicesMap = new HashMap<>();
+    private final Map<String, Map<String, SnsUser>> choiceVotersMap = new HashMap<>();
+    private final Set<SnsUser> voterSet = new HashSet<>();
 
     public VoteCounting(String id) {
         this.id = id;
     }
 
-    public List<String> fetchUserSelections(String openid) {
-        return userSelectionsMap.get(openid);
+    public List<String> fetchVoterChoices(String openid) {
+        return voterChoicesMap.get(openid);
     }
 
-    public void recordUserSelections(String openid, List<String> selections) {
-        userSelectionsMap.put(openid, selections);
+    public void recordVoterChoices(String openid, List<String> choices) {
+        voterChoicesMap.put(openid, choices);
     }
 
-    public void removeUserFromSelections(List<String> selections, String openid) {
-        for (String selection : selections) {
-            Map<String, SnsUser> usersMap = selectionUsersMap.get(selection);
+    public void removeVoterFromChoices(List<String> choices, String openid) {
+        for (String choice : choices) {
+            Map<String, SnsUser> usersMap = choiceVotersMap.get(choice);
             if (usersMap != null) {
                 usersMap.remove(openid);
             }
         }
     }
 
-    public void addUserToSelections(List<String> selections, SnsUser user) {
-        for (String selection : selections) {
-            Map<String, SnsUser> usersMap = selectionUsersMap.get(selection);
+    public void addVoterToChoices(List<String> choices, SnsUser voter) {
+        for (String chioce : choices) {
+            Map<String, SnsUser> usersMap = choiceVotersMap.get(chioce);
             if (usersMap == null) {
                 usersMap = new HashMap<>();
-                selectionUsersMap.put(selection, usersMap);
+                choiceVotersMap.put(chioce, usersMap);
             }
-            usersMap.put(user.openid, user);
+            usersMap.put(voter.openid, voter);
         }
     }
 
-    public void recordUser(SnsUser user) {
-        if (Objects.nonNull(user)) {
-            userSet.add(user);
+    public void recordVoter(SnsUser voter) {
+        if (Objects.nonNull(voter)) {
+            voterSet.add(voter);
         }
     }
 
-    public int usersCount() {
-        return userSet.size();
+    public int getVotersCount() {
+        return voterSet.size();
     }
 
-    public int usersCountOf(String caption) {
-        Map<String, SnsUser> userMap = selectionUsersMap.get(caption);
-        return Objects.isNull(userMap) ? 0 : userMap.size();
+    public List<SnsUser> getVotersOf(String caption) {
+        Map<String, SnsUser> voterMap = choiceVotersMap.get(caption);
+        return Objects.isNull(voterMap) ? new ArrayList<>() : new ArrayList<>(voterMap.values());
+    }
+
+    public int getVotersCountOf(String caption) {
+        Map<String, SnsUser> voterMap = choiceVotersMap.get(caption);
+        return Objects.isNull(voterMap) ? 0 : voterMap.size();
     }
 
     public boolean alreadyVoted(String openid) {
-        return userSelectionsMap.containsKey(openid);
+        return voterChoicesMap.containsKey(openid);
     }
 }

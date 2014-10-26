@@ -9,9 +9,7 @@ import org.vertx.java.core.json.impl.Json;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yuanyuan on 10/18/14 AD.
@@ -107,18 +105,47 @@ class Context {
             userMap.put(openid, user);
         }
         user.reserveField = time; // backup vote time into reserve field, this design seems smell
-        List<String> prevSelections = counting.fetchUserSelections(openid);
+        List<String> prevSelections = counting.fetchVoterChoices(openid);
         if (prevSelections != null) {
-            counting.removeUserFromSelections(prevSelections, openid);
+            counting.removeVoterFromChoices(prevSelections, openid);
         }
 
-        counting.addUserToSelections(selections, user);
-        counting.recordUserSelections(openid, selections);
-        counting.recordUser(user);
+        counting.addVoterToChoices(selections, user);
+        counting.recordVoterChoices(openid, selections);
+        counting.recordVoter(user);
     }
 
     private static void analyzeVoteContent(String line) {
         VoteContent content = Json.decodeValue(line, VoteContent.class);
         voteContentMap.put(content.id, content);
+    }
+
+    static VoteContent getVoteContent(String contentId) {
+        if (Objects.nonNull(contentId)) {
+            VoteContent existContent = voteContentMap.get(contentId);
+            if (Objects.nonNull(existContent)) {
+                setCountingInfo(existContent);
+                return existContent;
+            }
+        }
+        Collection<VoteContent> contents = voteContentMap.values();
+        VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
+        setCountingInfo(content);
+        return content;
+    }
+
+    static List<VoteContent> getVoteContentList() {
+        return new ArrayList<>(voteContentMap.values());
+    }
+
+    private static void setCountingInfo(VoteContent content) {
+        VoteCounting voteCounting = voteCountingMap.get(content.id);
+        if (Objects.isNull(voteCounting)) {
+            return;
+        }
+        content.count = voteCounting.getVotersCount();
+        for (VoteCandidate candidate : content.candidates) {
+            candidate.count = voteCounting.getVotersCountOf(candidate.caption);
+        }
     }
 }
