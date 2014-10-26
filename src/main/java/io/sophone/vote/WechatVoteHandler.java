@@ -52,8 +52,8 @@ public class WechatVoteHandler extends Middleware {
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
-                if ("text/event-stream".equals(accept)) {
-                    String contentId = request.getParameter("content-id");
+                String contentId = request.getParameter("content-id");
+                if (Objects.equals("text/event-stream", accept)) {
                     String openid = request.getParameter("openid", request.ip());
                     if (Objects.nonNull(contentId)) {
                         Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
@@ -63,6 +63,8 @@ public class WechatVoteHandler extends Middleware {
                         }
                         countingRequests.put(openid, request);
                     }
+                } else if (Objects.isNull(contentId)) {
+                    handleGetIndex(request, next);
                 } else {
                     handleGetContent(request, next);
                 }
@@ -85,6 +87,58 @@ public class WechatVoteHandler extends Middleware {
             case "CONNECT":
                 break;
         }
+    }
+
+    private void handleGetIndex(YokeRequest request, Handler<Object> next) {
+        List<VoteContent> contents = getVoteContentList();
+        request.put("contents", contents);
+
+        String code = request.getParameter("code");
+        if (Objects.isNull(code)) {
+            // Request is not from Wechat
+            SnsUser user = new SnsUser();
+            user.nickname = request.ip();
+            request.put("user", user);
+            request.response().render("wechat/vote/index.html");
+        }
+
+        final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);
+        HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
+            OAuth2Token auth = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
+            if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
+                SnsUser fetchedUser = Context.userMap.get(auth.openid);
+                if (fetchedUser == null) {
+                    final String userUrl = MessageFormat.format(USRINFO_URL, auth.access_token, auth.openid);
+                    HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
+                        SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
+                        if (Objects.isNull(user.errcode)) {
+                            request.put("user", user);
+                            request.response().render("wechat/vote/index.html");
+
+                            Context.userMap.put(user.openid, user);
+                            List<String> lines = new ArrayList<String>();
+                            lines.add(userResBody.toString());
+                            File userFile = new File(Context.userFilePath);
+                            try {
+                                Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
+                                container.logger().info("New user add to: " + Context.userFilePath);
+                            } catch (IOException e) {
+                                container.logger().error("Failed to write user file!" + e.toString());
+                            }
+                        } else {
+                            container.logger().error(user.errmsg);
+                        }
+                    }));
+                    userReq.end();
+                } else {
+                    request.put("user", fetchedUser);
+                    request.response().render("wechat/vote/index.html");
+                }
+            } else {
+                container.logger().error(auth.errmsg);
+            }
+        }));
+        tokenReq.end();
     }
 
     private void refreshCounting(String contentId) {
@@ -115,56 +169,17 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void handleGetContent(YokeRequest request, Handler<Object> next) {
-        String contentId = request.getParameter("content-id", "");
-        String code = request.getParameter("code");
-//        String state = request.getParameter("state");
+        String contentId = request.getParameter("content-id");
+        Objects.requireNonNull(contentId);
 
         VoteContent content = getVoteContent(contentId);
         request.put("content", content);
 
-        if (code != null) {
-            final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);
-            HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
-                OAuth2Token token = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
-                if (token.errcode == null && StringUtils.isNotBlank(token.openid)) {
-                    SnsUser fetchedUser = Context.userMap.get(token.openid);
-                    if (fetchedUser == null) {
-                        final String userUrl = MessageFormat.format(USRINFO_URL, token.access_token, token.openid);
-                        HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
-                            SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
-                            if (user.errcode == null) {
-                                request.put("user", user);
-                                request.response().render("vote.html");
+        String openid = request.getParameter("openid", request.ip());
+        SnsUser fetchedUser = Context.userMap.get(openid);
+        request.put("canVote", !content.onlyWechat || Objects.nonNull(fetchedUser));
 
-                                Context.userMap.put(user.openid, user);
-                                List<String> lines = new ArrayList<String>();
-                                lines.add(userResBody.toString());
-                                File userFile = new File(Context.userFilePath);
-                                try {
-                                    Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
-                                    container.logger().info("New user add to: " + Context.userFilePath);
-                                } catch (IOException e) {
-                                    container.logger().error("Failed to write user file!" + e.toString());
-                                }
-                            }
-                        }));
-                        userReq.end();
-                    } else {
-                        request.put("user", fetchedUser);
-                        request.response().render("vote.html");
-                    }
-                } else {
-                    container.logger().error(token.errmsg);
-                    request.response().end("Failed authentication.");
-                }
-            }));
-            tokenReq.end();
-        } else {
-            SnsUser user = new SnsUser();
-            user.nickname = request.ip();
-            request.put("user", user);
-            request.response().render("vote.html");
-        }
+        request.response().render("wechat/vote/detail.html");
     }
 
     private VoteContent getVoteContent(String contentId) {
@@ -179,6 +194,10 @@ public class WechatVoteHandler extends Middleware {
         VoteContent content = contents.isEmpty() ? new VoteContent() : contents.iterator().next();
         setCountingInfo(content);
         return content;
+    }
+
+    private List<VoteContent> getVoteContentList() {
+        return new ArrayList<>(Context.voteContentMap.values());
     }
 
     private void setCountingInfo(VoteContent content) {
@@ -197,9 +216,15 @@ public class WechatVoteHandler extends Middleware {
             next.handle(null);
             return;
         }
-        String contentId = request.getParameter("content-id", "");
+        String contentId = request.getParameter("content-id");
+        Objects.requireNonNull(contentId);
+        VoteContent content = getVoteContent(contentId);
         JsonObject answer = request.<JsonObject>body();
         if (StringUtils.isBlank(answer.getString("openid"))) {
+            if (content.onlyWechat) {
+                next.handle(null);
+                return;
+            }
             answer.putString("openid", request.ip());
         }
         Context.analyzeAnswer(answer);

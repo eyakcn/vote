@@ -36,15 +36,6 @@
 </head>
 <body>
 <div class="container">
-  <div id="user" th:object="${user}" style="display: none;">
-    <input name="openid" type="hidden" th:value="*{openid}"/>
-    <input name="nickname" type="hidden" th:value="*{nickname}"/>
-    <input name="sex" type="hidden" th:value="*{sex}"/>
-    <input name="province" type="hidden" th:value="*{province}"/>
-    <input name="city" type="hidden" th:value="*{city}"/>
-    <input name="country" type="hidden" th:value="*{country}"/>
-    <input name="headimgurl" type="hidden" th:value="*{headimgurl}"/>
-  </div>
   <article id="content" th:object="${content}" class="row">
     <input name="id" type="hidden" th:value="*{id}"/>
     <details open="true" class="col-xs-12">
@@ -52,7 +43,6 @@
         <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
         <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
-      <p th:text="${'欢迎您投票：' + user.nickname}"></p>
 
       <p th:text="*{text}"></p>
       <input name="title" type="hidden" th:value="*{title}"/>
@@ -62,16 +52,16 @@
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
     <div>
-      <input type="checkbox"/>
+      <input type="checkbox" th:if="${canVote}"/>
       <input type="hidden" th:value="${candidate.caption}"/>
     </div>
     <details th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
-        <audio preload="false" controls="true" th:if="*{audio}">
+        <audio controls="true" th:if="*{audio}">
           <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
         </audio>
-        <video width="100%" webkit-playsinline="true" preload="false" controls="true" th:if="*{video}">
+        <video width="100%" webkit-playsinline="true" controls="true" th:if="*{video}">
           <source th:src="*{'/sysroot/wechat/vote/video/' + video}" type="video/mp4"/>
         </video>
         <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
@@ -80,7 +70,7 @@
       <p th:text="*{text}"></p>
     </details>
   </section>
-  <div class="row">
+  <div class="row" th:if="${canVote}">
     <div class="col-xs-12">
       <button id="submit" type="button" class="btn btn-primary">提交</button>
     </div>
@@ -88,5 +78,5 @@
 </div>
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-<script type="text/javascript" src="/webroot/vote.js"></script>
+<script type="text/javascript" src="/webroot/wechat/vote/detail.js"></script>
 </html>

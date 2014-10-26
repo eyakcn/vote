@@ -9,7 +9,7 @@ import java.util.Objects;
 public final class SnsUser {
     public String openid; // 用户的唯一标识
     public String nickname; // 用户昵称
-    public Short sex; // 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
+    public short sex; // 用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
     public String province; // 用户个人资料填写的省份
     public String city; // 普通用户个人资料填写的城市
     public String country; // 国家，如中国为CN

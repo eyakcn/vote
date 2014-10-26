@@ -14,5 +14,8 @@ public class VoteContent {
     public int count;
     public int minSelection = 1;
     public int maxSelection = 1;
+    public boolean onlyWechat = false;
     public List<VoteCandidate> candidates = new ArrayList<>();
+    public String startDate;
+    public String endDate;
 }

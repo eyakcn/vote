@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="zh-Hans">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>华政刑司家园</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container">
+  <div id="user" th:object="${user}" style="display: none;">
+    <input name="openid" type="hidden" th:value="*{openid}"/>
+    <input name="nickname" type="hidden" th:value="*{nickname}"/>
+    <input name="sex" type="hidden" th:value="*{sex}"/>
+    <input name="province" type="hidden" th:value="*{province}"/>
+    <input name="city" type="hidden" th:value="*{city}"/>
+    <input name="country" type="hidden" th:value="*{country}"/>
+    <input name="headimgurl" type="hidden" th:value="*{headimgurl}"/>
+  </div>
+  <p th:text="'当前身份认证：' + ${user.nickname}"></p>
+
+  <p th:text="'可参与的投票活动数目：' + ${contents.size()}"></p>
+
+  <div class="list-group">
+    <th:block th:each="content : ${contents}"
+              th:with="canVote=${!content.onlyWechat || user.openid != null}">
+      <a th:if="${canVote}"
+         th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
+         class="list-group-item">
+        <h4 class="list-group-item-heading" th:text="${content.title}"></h4>
+
+        <p class="list-group-item-text" th:text="${content.text}"></p>
+      </a>
+    </th:block>
+  </div>
+</div>
+</body>
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+</html>
