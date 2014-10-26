@@ -9,11 +9,9 @@ import org.vertx.java.core.json.impl.Json;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by yuanyuan on 10/18/14 AD.
@@ -122,15 +120,5 @@ class Context {
     private static void analyzeVoteContent(String line) {
         VoteContent content = Json.decodeValue(line, VoteContent.class);
         voteContentMap.put(content.id, content);
-    }
-
-    public static List<String> getVotedContentIds(String openid) {
-        List<String> ids = new ArrayList<>();
-
-        return voteCountingMap.entrySet().stream().filter(entry -> {
-            return entry.getValue().alreadyVoted(openid);
-        }).map(entry -> {
-            return entry.getKey();
-        }).collect(Collectors.toList());
     }
 }

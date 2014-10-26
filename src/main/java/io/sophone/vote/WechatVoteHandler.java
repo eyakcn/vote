@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by eyakcn on 2014/10/13.
@@ -100,7 +101,7 @@ public class WechatVoteHandler extends Middleware {
             SnsUser user = new SnsUser();
             user.nickname = request.ip();
             request.put("user", user);
-            request.put("votedIds", Context.getVotedContentIds(request.ip()));
+            request.put("votedIds", getVotedContentIds(request.ip()));
             request.response().render("wechat/vote/index.html");
         }
 
@@ -115,7 +116,7 @@ public class WechatVoteHandler extends Middleware {
                         SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
                         if (Objects.isNull(user.errcode)) {
                             request.put("user", user);
-                            request.put("votedIds", Context.getVotedContentIds(user.openid));
+                            request.put("votedIds", getVotedContentIds(user.openid));
                             request.response().render("wechat/vote/index.html");
 
                             Context.userMap.put(user.openid, user);
@@ -135,7 +136,7 @@ public class WechatVoteHandler extends Middleware {
                     userReq.end();
                 } else {
                     request.put("user", fetchedUser);
-                    request.put("votedIds", Context.getVotedContentIds(fetchedUser.openid));
+                    request.put("votedIds", getVotedContentIds(fetchedUser.openid));
                     request.response().render("wechat/vote/index.html");
                 }
             } else {
@@ -143,6 +144,15 @@ public class WechatVoteHandler extends Middleware {
             }
         }));
         tokenReq.end();
+    }
+
+    private List<String> getVotedContentIds(String openid) {
+        List<String> ids = Context.voteCountingMap.entrySet().stream().filter(entry -> {
+            return entry.getValue().alreadyVoted(openid);
+        }).map(entry -> {
+            return entry.getKey();
+        }).collect(Collectors.toList());
+        return ids;
     }
 
     private void refreshCounting(String contentId) {

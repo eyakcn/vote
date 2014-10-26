@@ -8,13 +8,13 @@ import java.util.*;
  * Created by eyakcn on 2014/10/15.
  */
 public class VoteCounting {
-    private final String title;
+    private final String id;
     private final Map<String, List<String>> userSelectionsMap = new HashMap<>();
     private final Map<String, Map<String, SnsUser>> selectionUsersMap = new HashMap<>();
     private final Set<SnsUser> userSet = new HashSet<>();
 
-    public VoteCounting(String title) {
-        this.title = title;
+    public VoteCounting(String id) {
+        this.id = id;
     }
 
     public List<String> fetchUserSelections(String openid) {

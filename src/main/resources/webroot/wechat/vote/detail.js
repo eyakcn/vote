@@ -1,9 +1,10 @@
 $(function() {
+  var openid = getParameterByName('openid');
   var contentid = $('#content>input[name="id"]').val();
-  var openid = $('#user>input[name="openid"]').val();
-  var title = $('#content input[name="title"]').val();
+
   var minSelection = $('#content input[name="minSelection"]').val();
   var maxSelection = $('#content input[name="maxSelection"]').val();
+
   var getSelectionCount = function() {
     return $('input[type="checkbox"]:checked').length;
   };
@@ -81,4 +82,11 @@ $(function() {
       console.log("EventSource connection closed.")
     }
   }, false);
+
+  function getParameterByName(name) {
+      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+          results = regex.exec(location.search);
+      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
 });
