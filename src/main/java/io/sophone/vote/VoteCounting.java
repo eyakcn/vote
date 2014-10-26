@@ -59,4 +59,8 @@ public class VoteCounting {
         Map<String, SnsUser> userMap = selectionUsersMap.get(caption);
         return Objects.isNull(userMap) ? 0 : userMap.size();
     }
+
+    public boolean alreadyVoted(String openid) {
+        return userSelectionsMap.containsKey(openid);
+    }
 }

@@ -9,9 +9,11 @@ import org.vertx.java.core.json.impl.Json;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by yuanyuan on 10/18/14 AD.
@@ -89,14 +91,14 @@ class Context {
         if (StringUtils.isBlank(openid)) {
             return;
         }
-        String title = answer.getString("title");
+        String contentId = answer.getString("content-id");
         String time = answer.getString("time");
         List<String> selections = (List<String>) answer.getArray("selections").toList();
 
-        VoteCounting counting = voteCountingMap.get(title);
+        VoteCounting counting = voteCountingMap.get(contentId);
         if (counting == null) {
-            counting = new VoteCounting(title);
-            voteCountingMap.put(title, counting);
+            counting = new VoteCounting(contentId);
+            voteCountingMap.put(contentId, counting);
         }
 
         SnsUser user = userMap.get(openid);
@@ -122,4 +124,13 @@ class Context {
         voteContentMap.put(content.id, content);
     }
 
+    public static List<String> getVotedContentIds(String openid) {
+        List<String> ids = new ArrayList<>();
+
+        return voteCountingMap.entrySet().stream().filter(entry -> {
+            return entry.getValue().alreadyVoted(openid);
+        }).map(entry -> {
+            return entry.getKey();
+        }).collect(Collectors.toList());
+    }
 }

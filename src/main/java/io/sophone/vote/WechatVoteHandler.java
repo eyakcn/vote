@@ -62,6 +62,7 @@ public class WechatVoteHandler extends Middleware {
                             countingRequestsMap.put(contentId, countingRequests);
                         }
                         countingRequests.put(openid, request);
+                        container.logger().info("New counting reqeust from : " + openid);
                     }
                 } else if (Objects.isNull(contentId)) {
                     handleGetIndex(request, next);
@@ -99,6 +100,7 @@ public class WechatVoteHandler extends Middleware {
             SnsUser user = new SnsUser();
             user.nickname = request.ip();
             request.put("user", user);
+            request.put("votedIds", Context.getVotedContentIds(request.ip()));
             request.response().render("wechat/vote/index.html");
         }
 
@@ -113,6 +115,7 @@ public class WechatVoteHandler extends Middleware {
                         SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
                         if (Objects.isNull(user.errcode)) {
                             request.put("user", user);
+                            request.put("votedIds", Context.getVotedContentIds(user.openid));
                             request.response().render("wechat/vote/index.html");
 
                             Context.userMap.put(user.openid, user);
@@ -132,6 +135,7 @@ public class WechatVoteHandler extends Middleware {
                     userReq.end();
                 } else {
                     request.put("user", fetchedUser);
+                    request.put("votedIds", Context.getVotedContentIds(fetchedUser.openid));
                     request.response().render("wechat/vote/index.html");
                 }
             } else {
@@ -151,9 +155,10 @@ public class WechatVoteHandler extends Middleware {
         }
 
         String responseText = "data: " + countingResult.encode() + "\n\n";
-        for (YokeRequest request : countingRequestsMap.get(contentId).values()) {
+        for (Map.Entry<String, YokeRequest> entry : countingRequestsMap.get(contentId).entrySet()) {
             // TODO how to test whether connection is alive?
-            writeSseMessage(request.response(), responseText);
+            writeSseMessage(entry.getValue().response(), responseText);
+            container.logger().info("Response to counting request from : " + entry.getKey());
         }
     }
 
@@ -201,7 +206,7 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void setCountingInfo(VoteContent content) {
-        VoteCounting voteCounting = Context.voteCountingMap.get(content.title);
+        VoteCounting voteCounting = Context.voteCountingMap.get(content.id);
         if (Objects.isNull(voteCounting)) {
             return;
         }
@@ -212,14 +217,12 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void handlePost(YokeRequest request, Handler<Object> next) {
-        if (request.body() == null) {
-            next.handle(null);
-            return;
-        }
         String contentId = request.getParameter("content-id");
         Objects.requireNonNull(contentId);
         VoteContent content = getVoteContent(contentId);
+
         JsonObject answer = request.<JsonObject>body();
+        Objects.requireNonNull(answer);
         if (StringUtils.isBlank(answer.getString("openid"))) {
             if (content.onlyWechat) {
                 next.handle(null);
@@ -227,6 +230,8 @@ public class WechatVoteHandler extends Middleware {
             }
             answer.putString("openid", request.ip());
         }
+        answer.putString("ip", request.ip());
+        answer.putString("content-id", contentId);
         Context.analyzeAnswer(answer);
 
         String line = answer.encode();

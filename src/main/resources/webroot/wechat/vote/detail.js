@@ -24,15 +24,15 @@ $(function() {
     }
     $('#submit').prop('disabled', true);
 
-    var result = {};
-    result.openid = openid;
-    result.title = title;
-    result.time = (new Date()).toISOString();
-    result.selections = [];
+    var result = {
+      'openid': openid,
+      'time': (new Date()).toISOString(),
+      'selections': []
+    };
 
     $('input[type="checkbox"]:checked').each(function() {
       var caption = $(this).next().val();
-      result.selections.push(caption);
+      result['selections'].push(caption);
     });
 
     $.ajax({
@@ -51,7 +51,8 @@ $(function() {
     });
   });
 
-  var source = new EventSource('vote?content-id=' + contentid + '&openid=' + openid);
+  var countingUrl = 'vote?content-id=' + contentid + ((openid && openid.length > 0) ? ('&openid=' + openid) : '');
+  var source = new EventSource(countingUrl);
   source.addEventListener('message', function(e) {
     console.log(e.data);
     var counting = JSON.parse(e.data);
