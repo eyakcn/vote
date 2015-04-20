@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.vertx.java.core.Handler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,15 +42,18 @@ public class WechatVoteBulletinHandler extends Middleware {
 
     public Map<String, String> getVotersMap(VoteContent content) {
         VoteCounting counting = Context.voteCountingMap.get(content.id);
+        if (Objects.isNull(counting)) {
+            return Collections.EMPTY_MAP;
+        }
 
         return content.candidates.stream().map(candidate -> {
             List<SnsUser> voters = counting.getVotersOf(candidate.caption);
-            List<String> voterNames = voters.stream().map(voter -> {
-                return voter.nickname;
-            }).collect(Collectors.toList());
+            List<String> voterNames = voters.stream()
+                    .map(voter -> voter.nickname)
+                    .collect(Collectors.toList());
 
             String voterNamesText = StringUtils.join(voterNames, ", ");
-            return new Pair<String, String>(candidate.caption, voterNamesText);
+            return new Pair<>(candidate.caption, voterNamesText);
 
         }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }

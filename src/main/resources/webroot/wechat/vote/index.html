@@ -28,12 +28,11 @@
 
   <div class="list-group">
     <th:block th:each="content : ${contents}"
-              th:with="canVote=${!content.onlyWechat || user.openid != null},voted=${votedIds.contains(content.id)}">
-      <a th:if="${canVote}"
-         th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
+              th:with="voted=${votedIds.contains(content.id)}">
+      <a th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
          th:class="'list-group-item' + ${voted ? ' voted' : ''}">
         <h4 class="list-group-item-heading"
-            th:text="${(voted ? '(已投票)' : '') + '［编号: ' + content.id + '］' + content.title}"></h4>
+            th:text="${(voted ? '(您已投)' : '') + '［编号: ' + content.id + '］' + content.title}"></h4>
 
         <p th:unless="${voted}" class="list-group-item-text" th:text="${content.text}"></p>
       </a>

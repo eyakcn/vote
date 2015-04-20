@@ -37,6 +37,7 @@ class Context {
         try {
             if (contentFile.exists()) {
                 List<String> lines = Files.readAllLines(contentFile.toPath());
+                // FIXME it's a bad idea to write each vote content in single line
                 lines.forEach(line -> {
                     analyzeVoteContent(line); // need userMap prepared
                 });

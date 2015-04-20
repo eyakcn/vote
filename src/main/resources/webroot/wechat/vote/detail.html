@@ -41,10 +41,10 @@
     <details open="true" class="col-xs-12">
       <summary>
         <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
-        <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
 
       <p th:text="*{text}"></p>
+      <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       <input name="title" type="hidden" th:value="*{title}"/>
       <input name="minSelection" type="hidden" th:value="*{minSelection}"/>
       <input name="maxSelection" type="hidden" th:value="*{maxSelection}"/>
@@ -55,19 +55,19 @@
       <input type="checkbox" th:if="${canVote}"/>
       <input type="hidden" th:value="${candidate.caption}"/>
     </div>
-    <details th:object="${candidate}" class="col-xs-12">
+    <details open="true" th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
-        <audio controls="true" th:if="*{audio}">
-          <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
-        </audio>
-        <video width="100%" webkit-playsinline="true" controls="true" th:if="*{video}">
-          <source th:src="*{'/sysroot/wechat/vote/video/' + video}" type="video/mp4"/>
-        </video>
-        <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       </summary>
 
       <p th:text="*{text}"></p>
+      <audio controls="true" th:if="*{audio}">
+        <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
+      </audio>
+      <video width="100%" webkit-playsinline="true" controls="true" th:if="*{video}">
+        <source th:src="*{'/sysroot/wechat/vote/video/' + video}" type="video/mp4"/>
+      </video>
+      <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="max-width: 100%;"/>
     </details>
   </section>
   <div class="row" th:if="${canVote}">

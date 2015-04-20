@@ -34,6 +34,6 @@ public class Main extends Verticle {
         app.use("/osaka/counting", new QuestionnaireStatisticHandler());
         app.use("/webroot/", new Static("webroot/", 0));
         app.use("/sysroot/", new Static(System.getProperty("user.home") + "/", 0));
-        app.listen(8181);
+        app.listen(8080);
     }
 }

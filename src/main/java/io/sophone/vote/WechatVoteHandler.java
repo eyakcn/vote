@@ -30,6 +30,10 @@ import java.util.stream.Collectors;
 public class WechatVoteHandler extends Middleware {
     private static final String TOKEN_URL = "/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
     private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
+
+    private static final String INDEX_HTML = "wechat/vote/index.html";
+    private static final String DETAIL_HTML = "wechat/vote/detail.html";
+
     private static final Map<String, Map<String, YokeRequest>> countingRequestsMap = new HashMap<>();
     private static HttpClient httpClient;
     private static Container container;
@@ -102,7 +106,7 @@ public class WechatVoteHandler extends Middleware {
             user.nickname = request.ip();
             request.put("user", user);
             request.put("votedIds", getVotedContentIds(request.ip()));
-            request.response().render("wechat/vote/index.html");
+            request.response().render(INDEX_HTML);
         }
 
         final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);
@@ -117,10 +121,10 @@ public class WechatVoteHandler extends Middleware {
                         if (Objects.isNull(user.errcode)) {
                             request.put("user", user);
                             request.put("votedIds", getVotedContentIds(user.openid));
-                            request.response().render("wechat/vote/index.html");
+                            request.response().render(INDEX_HTML);
 
                             Context.userMap.put(user.openid, user);
-                            List<String> lines = new ArrayList<String>();
+                            List<String> lines = new ArrayList<>();
                             lines.add(userResBody.toString());
                             File userFile = new File(Context.userFilePath);
                             try {
@@ -137,7 +141,7 @@ public class WechatVoteHandler extends Middleware {
                 } else {
                     request.put("user", fetchedUser);
                     request.put("votedIds", getVotedContentIds(fetchedUser.openid));
-                    request.response().render("wechat/vote/index.html");
+                    request.response().render(INDEX_HTML);
                 }
             } else {
                 container.logger().error(auth.errmsg);
@@ -147,11 +151,10 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private List<String> getVotedContentIds(String openid) {
-        List<String> ids = Context.voteCountingMap.entrySet().stream().filter(entry -> {
-            return entry.getValue().alreadyVoted(openid);
-        }).map(entry -> {
-            return entry.getKey();
-        }).collect(Collectors.toList());
+        List<String> ids = Context.voteCountingMap.entrySet().stream()
+                .filter(entry -> entry.getValue().alreadyVoted(openid))
+                .map(entry -> entry.getKey())
+                .collect(Collectors.toList());
         return ids;
     }
 
@@ -194,7 +197,7 @@ public class WechatVoteHandler extends Middleware {
         SnsUser fetchedUser = Context.userMap.get(openid);
         request.put("canVote", !content.onlyWechat || Objects.nonNull(fetchedUser));
 
-        request.response().render("wechat/vote/detail.html");
+        request.response().render(DETAIL_HTML);
     }
 
     private void handlePost(YokeRequest request, Handler<Object> next) {
@@ -216,7 +219,7 @@ public class WechatVoteHandler extends Middleware {
         Context.analyzeAnswer(answer);
 
         String line = answer.encode();
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         lines.add(line);
         File answerFile = new File(Context.answerFilePath);
         try {
