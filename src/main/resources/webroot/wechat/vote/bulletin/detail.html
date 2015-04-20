@@ -45,7 +45,7 @@
     </details>
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
-    <details th:object="${candidate}" class="col-xs-12">
+    <details open="true" th:object="${candidate}" class="col-xs-12">
       <summary>
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
       </summary>
