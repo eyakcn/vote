@@ -43,7 +43,7 @@
         <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
       </summary>
 
-      <p th:text="*{text}"></p>
+      <pre th:text="*{text}"></pre>
       <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="width: 100%;"/>
       <input name="title" type="hidden" th:value="*{title}"/>
       <input name="minSelection" type="hidden" th:value="*{minSelection}"/>
@@ -60,7 +60,7 @@
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
       </summary>
 
-      <p th:text="*{text}"></p>
+      <pre th:text="*{text}"></pre>
       <audio controls="true" th:if="*{audio}">
         <source th:src="*{'/sysroot/wechat/vote/audio/' + audio}" type="audio/mpeg"/>
       </audio>
