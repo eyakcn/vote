@@ -18,6 +18,8 @@ public class Main extends Verticle {
 
     @Override
     public void start() {
+        container.logger().info("Temp dir: " + System.getProperty("java.io.tmpdir"));
+
         WechatVoteHandler.setHttpClient(vertx.createHttpClient());
         WechatVoteHandler.setContainer(container);
 

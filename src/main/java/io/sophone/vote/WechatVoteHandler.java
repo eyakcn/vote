@@ -113,7 +113,7 @@ public class WechatVoteHandler extends Middleware {
         request.put("contents", contents);
 
         String code = request.getParameter("code");
-        container.logger().info("Handle redirect request from Wechat server with code = " + code);
+        container.logger().info("Handle request with code = " + code);
         if (Objects.isNull(code)) {
             // Request is not from Wechat
             SnsUser user = new SnsUser();
@@ -121,6 +121,7 @@ public class WechatVoteHandler extends Middleware {
             request.put("user", user);
             request.put("votedIds", getVotedContentIds(request.ip()));
             request.response().render(INDEX_HTML);
+            return;
         }
 
         final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);
@@ -174,6 +175,7 @@ public class WechatVoteHandler extends Middleware {
         return ids;
     }
 
+    // FIXME Bug: the succeed submit followed by a failure submit
     private void refreshCounting(String contentId) {
         VoteContent voteContent = Context.getVoteContent(contentId);
 

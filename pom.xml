@@ -45,6 +45,8 @@
     <annotation.version>13.0</annotation.version>
     <commonlang.version>3.4</commonlang.version>
     <thymeleaf.version>2.1.4.RELEASE</thymeleaf.version>
+    <log4j.version>2.2</log4j.version>
+    <slf4j.version>1.7.12</slf4j.version>
 
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
@@ -66,6 +68,21 @@
   </repositories>
 
   <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
