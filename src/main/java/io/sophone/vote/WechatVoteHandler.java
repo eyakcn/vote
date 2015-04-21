@@ -54,11 +54,15 @@ public class WechatVoteHandler extends Middleware {
 
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
+        String requestExceptionMessage = "";
+        String responseExceptionMessage = "";
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
                 String contentId = request.getParameter("content-id");
                 if (Objects.equals("text/event-stream", accept)) {
+                    requestExceptionMessage = "Counting Request Exception";
+                    responseExceptionMessage = "Counting Response Exception";
                     String openid = request.getParameter("openid", request.ip());
                     if (Objects.nonNull(contentId)) {
                         Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
@@ -67,17 +71,23 @@ public class WechatVoteHandler extends Middleware {
                             countingRequestsMap.put(contentId, countingRequests);
                         }
                         countingRequests.put(openid, request);
-                        container.logger().info("New counting reqeust from : " + openid);
+                        container.logger().info("New counting reqeust for " + contentId + " from " + openid);
                     }
                 } else if (Objects.isNull(contentId)) {
+                    requestExceptionMessage = "Index Page Request Exception";
+                    responseExceptionMessage = "Index Page Response Exception";
                     handleGetIndex(request, next);
                 } else {
+                    requestExceptionMessage = "Detail Page Request Exception";
+                    responseExceptionMessage = "Detail Page Response Exception";
                     handleGetContent(request, next);
                 }
                 break;
             case "PUT":
                 break;
             case "POST":
+                requestExceptionMessage = "Vote Request Exception";
+                responseExceptionMessage = "Vote Response Exception";
                 handlePost(request, next);
                 break;
             case "DELETE":
@@ -93,6 +103,11 @@ public class WechatVoteHandler extends Middleware {
             case "CONNECT":
                 break;
         }
+
+        final String finalRequestMsg = requestExceptionMessage;
+        final String finalResponseMsg = responseExceptionMessage;
+        request.exceptionHandler(event -> container.logger().error(finalRequestMsg, event));
+        request.response().exceptionHandler(event -> container.logger().error(finalResponseMsg, event));
     }
 
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
@@ -169,9 +184,10 @@ public class WechatVoteHandler extends Middleware {
 
         String responseText = "data: " + countingResult.encode() + "\n\n";
         for (Map.Entry<String, YokeRequest> entry : countingRequestsMap.get(contentId).entrySet()) {
-            // TODO how to test whether connection is alive?
-            writeSseMessage(entry.getValue().response(), responseText);
-            container.logger().info("Response to counting request from : " + entry.getKey());
+            String openid = entry.getKey();
+            YokeRequest countingRequest = entry.getValue();
+            writeSseMessage(countingRequest.response(), responseText);
+            container.logger().info("Response to counting request for " + contentId + " from " + openid);
         }
     }
 
@@ -183,7 +199,14 @@ public class WechatVoteHandler extends Middleware {
             throw new RuntimeException(e);
         }
         response.putHeader("Cache-Control", "no-cache");
-        response.write(line);
+
+        // TODO remove counting request from map when the connection is not alive
+        try {
+            response.write(line);
+        } catch (Throwable t) {
+            // May catch nothing, should set exception handler for response object
+            container.logger().error("Counting Response Exception", t);
+        }
     }
 
     private void handleGetContent(YokeRequest request, Handler<Object> next) {
@@ -195,6 +218,7 @@ public class WechatVoteHandler extends Middleware {
 
         String openid = request.getParameter("openid", request.ip());
         SnsUser fetchedUser = Context.userMap.get(openid);
+        // TODO during the open and close time of the vote
         request.put("canVote", !content.onlyWechat || Objects.nonNull(fetchedUser));
 
         request.response().render(DETAIL_HTML);
