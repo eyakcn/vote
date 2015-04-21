@@ -58,6 +58,7 @@ public class WechatVoteHandler extends Middleware {
 
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
+        container.logger().info(request.method() + " request from " + request.uri());
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
@@ -112,6 +113,7 @@ public class WechatVoteHandler extends Middleware {
         request.put("contents", contents);
 
         String code = request.getParameter("code");
+        container.logger().info("Handle redirect request from Wechat server with code = " + code);
         if (Objects.isNull(code)) {
             // Request is not from Wechat
             SnsUser user = new SnsUser();
@@ -125,6 +127,8 @@ public class WechatVoteHandler extends Middleware {
         HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
             OAuth2Token auth = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
             if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
+                container.logger().info("Succeed to get access token by using redirect code.");
+
                 SnsUser fetchedUser = Context.userMap.get(auth.openid);
                 if (fetchedUser == null) {
                     final String userUrl = MessageFormat.format(USRINFO_URL, auth.access_token, auth.openid);
@@ -146,7 +150,7 @@ public class WechatVoteHandler extends Middleware {
                                 container.logger().error("Failed to write user file!" + e.toString());
                             }
                         } else {
-                            container.logger().error(user.errmsg);
+                            container.logger().error(user.errcode + ": " + user.errmsg);
                         }
                     }));
                     userReq.end();
@@ -156,7 +160,7 @@ public class WechatVoteHandler extends Middleware {
                     request.response().render(INDEX_HTML);
                 }
             } else {
-                container.logger().error(auth.errmsg);
+                container.logger().error(auth.errcode + ": " + auth.errmsg);
             }
         }));
         tokenReq.end();
