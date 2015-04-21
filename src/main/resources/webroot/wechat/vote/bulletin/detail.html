@@ -6,7 +6,7 @@
   <title>华政刑司家园</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
   <style>
-    article > details > summary {
+    article > div.details {
       display: block;
       font-size: 1.15em;
       -webkit-margin-before: 0.83em;
@@ -20,20 +20,11 @@
       position: relative;
     }
 
-    section > details > summary {
+    section > div.details > div.summary {
       display: block;
       font-size: 1.015em;
       font-weight: bold;
       margin: 6px 0px;
-    }
-
-    section > div {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      width: 30px;
-      height: 40px;
-      z-index: 10;
     }
   </style>
 </head>
@@ -41,20 +32,19 @@
 <div class="container">
   <article id="content" th:object="${content}" class="row">
     <input name="id" type="hidden" th:value="*{id}"/>
-    <details open="true" class="col-xs-12">
-      <summary>
-        <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
-      </summary>
-    </details>
+
+    <div class="details col-xs-12">
+      <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
+    </div>
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
-    <details open="true" th:object="${candidate}" class="col-xs-12">
-      <summary>
+    <div open="true" th:object="${candidate}" class="details col-xs-12">
+      <div class="summary">
         <a th:text="*{caption + '(票数：' + count + ')'}"></a>
-      </summary>
+      </div>
 
       <p th:text="${votersMap.get(candidate.caption)}"></p>
-    </details>
+    </div>
   </section>
 </div>
 </body>
