@@ -6,36 +6,93 @@
   <title>华政刑司家园</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
   <style>
-    article>details>summary {
-    display: block;
-    font-size: 1.15em;
-    -webkit-margin-before: 0.83em;
-    -webkit-margin-after: 0.83em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
-    font-weight: bold;
+    #expand-collapse-group {
+      display: flex;
+      position: fixed;
+      top: 5px;
+      right: 5px;
+      z-index: 11;
     }
+
+    #expand-collapse-group > div {
+      margin: 2px;
+      width: 30px;
+      height: 30px;
+      font-size: 30px;
+      border: 1px solid #4290FB;
+      cursor: pointer;
+      color: #4290FB;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 27px;
+      border-radius: 3px;
+      background-color: white;
+    }
+
+    article > details > summary {
+      display: block;
+      font-size: 1.15em;
+      -webkit-margin-before: 0.83em;
+      -webkit-margin-after: 0.83em;
+      -webkit-margin-start: 0px;
+      -webkit-margin-end: 0px;
+      font-weight: bold;
+    }
+
     section {
-    position: relative;
+      position: relative;
     }
-    section>details>summary {
-    display: block;
-    font-size: 1.015em;
-    font-weight: bold;
-    margin: 6px 0px;
+
+    section > details > summary {
+      display: block;
+      font-size: 1.015em;
+      font-weight: bold;
+      margin: 6px 0px;
     }
-    section>div {
-    position: absolute;
-    right: 8px;
-    top: 8px;
-    width: 30px;
-    height: 40px;
-    z-index: 10;
+
+    section > div {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 30px;
+      height: 40px;
+      z-index: 10;
+    }
+
+    input[type="checkbox"] {
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #E0E0E0;
+      box-sizing: border-box;
+      position: relative;
+      box-sizing: content-box;
+      top: -3px;
+      right: 12px;
+      width: 45px;
+      height: 18px;
+      border-width: 0;
+      transition: all .3s linear;
+      border-radius: 2px;
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: #4290FB;
+    }
+
+    input[type="checkbox"]:focus {
+      outline: 0 none;
+      box-shadow: none;
     }
   </style>
 </head>
 <body>
 <div class="container">
+  <div id="expand-collapse-group">
+    <div id="collapse-btn">-</div>
+    <div id="expand-btn">+</div>
+  </div>
+
   <article id="content" th:object="${content}" class="row">
     <input name="id" type="hidden" th:value="*{id}"/>
     <details open="true" class="col-xs-12">
