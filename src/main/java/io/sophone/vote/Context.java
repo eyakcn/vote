@@ -10,14 +10,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by yuanyuan on 10/18/14 AD.
  */
 class Context {
-    static final Map<String, SnsUser> userMap = new HashMap<>();
-    static final Map<String, VoteCounting> voteCountingMap = new HashMap<>();
-    static final Map<String, VoteContent> voteContentMap = new HashMap<>();
+    static final Map<String, SnsUser> userMap = new ConcurrentHashMap<>();
+    static final Map<String, VoteCounting> voteCountingMap = new ConcurrentHashMap<>();
+    static final Map<String, VoteContent> voteContentMap = new ConcurrentHashMap<>();
     static final String baseDir = System.getProperty("user.home") + "/wechat/vote/";
     static final String userFilePath = baseDir + "vote_users.txt";
     static final String answerFilePath = baseDir + "vote_history.txt";

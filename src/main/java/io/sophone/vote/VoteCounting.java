@@ -1,17 +1,19 @@
 package io.sophone.vote;
 
 import io.sophone.wechat.SnsUser;
+import org.vertx.java.core.impl.ConcurrentHashSet;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by eyakcn on 2014/10/15.
  */
 public class VoteCounting {
     private final String id;
-    private final Map<String, List<String>> voterChoicesMap = new HashMap<>();
-    private final Map<String, Map<String, SnsUser>> choiceVotersMap = new HashMap<>();
-    private final Set<SnsUser> voterSet = new HashSet<>();
+    private final Map<String, List<String>> voterChoicesMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, SnsUser>> choiceVotersMap = new ConcurrentHashMap<>();
+    private final Set<SnsUser> voterSet = new ConcurrentHashSet<>();
 
     public VoteCounting(String id) {
         this.id = id;
@@ -38,7 +40,7 @@ public class VoteCounting {
         for (String chioce : choices) {
             Map<String, SnsUser> usersMap = choiceVotersMap.get(chioce);
             if (usersMap == null) {
-                usersMap = new HashMap<>();
+                usersMap = new ConcurrentHashMap<>();
                 choiceVotersMap.put(chioce, usersMap);
             }
             usersMap.put(voter.openid, voter);

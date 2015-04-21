@@ -21,7 +21,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +38,7 @@ public class WechatVoteHandler extends Middleware {
     private static final String INDEX_HTML = "wechat/vote/index.html";
     private static final String DETAIL_HTML = "wechat/vote/detail.html";
 
-    private static final Map<String, Map<String, YokeRequest>> countingRequestsMap = new HashMap<>();
+    private static final Map<String, Map<String, YokeRequest>> countingRequestsMap = new ConcurrentHashMap<>();
     private static HttpClient httpClient;
     private static Container container;
 
@@ -54,40 +58,38 @@ public class WechatVoteHandler extends Middleware {
 
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
-        String requestExceptionMessage = "";
-        String responseExceptionMessage = "";
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
                 String contentId = request.getParameter("content-id");
                 if (Objects.equals("text/event-stream", accept)) {
-                    requestExceptionMessage = "Counting Request Exception";
-                    responseExceptionMessage = "Counting Response Exception";
+                    request.exceptionHandler(event -> container.logger().error("Counting Request Exception", event));
+                    request.response().exceptionHandler(event -> container.logger().error("Counting Response Exception", event));
                     String openid = request.getParameter("openid", request.ip());
                     if (Objects.nonNull(contentId)) {
                         Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
                         if (Objects.isNull(countingRequests)) {
-                            countingRequests = new HashMap<>();
+                            countingRequests = new ConcurrentHashMap<>();
                             countingRequestsMap.put(contentId, countingRequests);
                         }
                         countingRequests.put(openid, request);
                         container.logger().info("New counting reqeust for " + contentId + " from " + openid);
                     }
                 } else if (Objects.isNull(contentId)) {
-                    requestExceptionMessage = "Index Page Request Exception";
-                    responseExceptionMessage = "Index Page Response Exception";
+                    request.exceptionHandler(event -> container.logger().error("Index Page Request Exception", event));
+                    request.response().exceptionHandler(event -> container.logger().error("Index Page Response Exception", event));
                     handleGetIndex(request, next);
                 } else {
-                    requestExceptionMessage = "Detail Page Request Exception";
-                    responseExceptionMessage = "Detail Page Response Exception";
+                    request.exceptionHandler(event -> container.logger().error("Detail Page Request Exception", event));
+                    request.response().exceptionHandler(event -> container.logger().error("Detail Page Response Exception", event));
                     handleGetContent(request, next);
                 }
                 break;
             case "PUT":
                 break;
             case "POST":
-                requestExceptionMessage = "Vote Request Exception";
-                responseExceptionMessage = "Vote Response Exception";
+                request.exceptionHandler(event -> container.logger().error("Vote Request Exception", event));
+                request.response().exceptionHandler(event -> container.logger().error("Vote Response Exception", event));
                 handlePost(request, next);
                 break;
             case "DELETE":
@@ -103,11 +105,6 @@ public class WechatVoteHandler extends Middleware {
             case "CONNECT":
                 break;
         }
-
-        final String finalRequestMsg = requestExceptionMessage;
-        final String finalResponseMsg = responseExceptionMessage;
-        request.exceptionHandler(event -> container.logger().error(finalRequestMsg, event));
-        request.response().exceptionHandler(event -> container.logger().error(finalResponseMsg, event));
     }
 
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
