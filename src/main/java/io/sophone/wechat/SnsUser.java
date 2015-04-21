@@ -16,6 +16,7 @@ public final class SnsUser {
     public String language; // 语言
     public String headimgurl; //用户头像，最后一个数值代表正方形头像大小（有0、46、64、96、132数值可选，0代表640*640正方形头像），用户没有头像时该项为空
     public List<String> privilege; // 用户特权信息，json 数组，如微信沃卡用户为（chinaunicom）
+    public String unionid;
 
     public String errcode;
     public String errmsg;
