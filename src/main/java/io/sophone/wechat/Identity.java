@@ -6,4 +6,7 @@ package io.sophone.wechat;
 public class Identity {
     public String appid;
     public String secret;
+    public String originid;
+    public String token;
+    public String aeskey;
 }

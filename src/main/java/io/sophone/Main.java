@@ -9,6 +9,7 @@ import io.sophone.override.ThymeleafEngine;
 import io.sophone.questionnaire.QuestionnaireStatisticHandler;
 import io.sophone.vote.WechatVoteBulletinHandler;
 import io.sophone.vote.WechatVoteHandler;
+import io.sophone.weixin.WeixinHandler;
 import org.vertx.java.platform.Verticle;
 
 /**
@@ -31,11 +32,12 @@ public class Main extends Verticle {
         app.use(new ErrorHandler(true));
         app.use(new Limit(4096));
         app.use(new BodyParser());
+        app.use("/weixin", new WeixinHandler(this));
         app.use("/wechat/vote", new WechatVoteHandler());
         app.use("/wechat/bulletin/vote", new WechatVoteBulletinHandler());
         app.use("/osaka/counting", new QuestionnaireStatisticHandler());
         app.use("/webroot/", new Static("webroot/", 0));
         app.use("/sysroot/", new Static(System.getProperty("user.home") + "/", 0));
-        app.listen(8080);
+        app.listen(80);
     }
 }
