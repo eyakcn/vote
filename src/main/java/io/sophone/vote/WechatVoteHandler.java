@@ -58,12 +58,13 @@ public class WechatVoteHandler extends Middleware {
 
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
-        container.logger().info(request.method() + " request from " + request.uri());
+        container.logger().info(request.ip() + " " + request.method() + " " + request.uri());
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
                 String contentId = request.getParameter("content-id");
                 if (Objects.equals("text/event-stream", accept)) {
+                    // Counting request
                     request.exceptionHandler(event -> container.logger().error("Counting Request Exception", event));
                     request.response().exceptionHandler(event -> container.logger().error("Counting Response Exception", event));
                     String openid = request.getParameter("openid", request.ip());
@@ -77,10 +78,12 @@ public class WechatVoteHandler extends Middleware {
                         container.logger().info("New counting reqeust for " + contentId + " from " + openid);
                     }
                 } else if (Objects.isNull(contentId)) {
+                    // index.html
                     request.exceptionHandler(event -> container.logger().error("Index Page Request Exception", event));
                     request.response().exceptionHandler(event -> container.logger().error("Index Page Response Exception", event));
                     handleGetIndex(request, next);
                 } else {
+                    // detail.html
                     request.exceptionHandler(event -> container.logger().error("Detail Page Request Exception", event));
                     request.response().exceptionHandler(event -> container.logger().error("Detail Page Response Exception", event));
                     handleGetContent(request, next);
@@ -89,6 +92,7 @@ public class WechatVoteHandler extends Middleware {
             case "PUT":
                 break;
             case "POST":
+                // submit voting request
                 request.exceptionHandler(event -> container.logger().error("Vote Request Exception", event));
                 request.response().exceptionHandler(event -> container.logger().error("Vote Response Exception", event));
                 handlePost(request, next);
@@ -108,16 +112,25 @@ public class WechatVoteHandler extends Middleware {
         }
     }
 
+    // FIXME no check on Wechat user based on openid
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
         List<VoteContent> contents = Context.getVoteContentList();
         request.put("contents", contents);
 
         String code = request.getParameter("code");
         container.logger().info("Handle request with code = " + code);
+        // 服务号才能拿到授权访问用户信息，订阅号则不能，code用来换取Wechat服务器AccessToken，以进一步获取用户信息
         if (Objects.isNull(code)) {
-            // Request is not from Wechat
             SnsUser user = new SnsUser();
-            user.nickname = request.ip();
+            String openid = request.getParameter("openid");
+            if (Objects.nonNull(openid)) {
+                user.openid = openid;
+            } else {
+                user.openid = request.ip();
+                user.ipBased = true;
+            }
+            user.nickname = user.openid;
+            Context.userMap.put(user.openid, user);
             request.put("user", user);
             request.put("votedIds", getVotedContentIds(request.ip()));
             request.response().render(INDEX_HTML);
@@ -190,7 +203,7 @@ public class WechatVoteHandler extends Middleware {
             String openid = entry.getKey();
             YokeRequest countingRequest = entry.getValue();
             writeSseMessage(countingRequest.response(), responseText);
-            container.logger().info("Response to counting request for " + contentId + " from " + openid);
+            container.logger().info("Response counting request for " + contentId + " to " + openid);
         }
     }
 
@@ -221,9 +234,18 @@ public class WechatVoteHandler extends Middleware {
 
         String openid = request.getParameter("openid", request.ip());
         SnsUser fetchedUser = Context.userMap.get(openid);
+        if (Objects.isNull(fetchedUser)) {
+            // XXX user skipped index page, and access detail page directly
+            String url = "/wechat/vote";
+            String paramOpenid = request.getParameter("openid");
+            if (Objects.nonNull(paramOpenid)) {
+                url += "?openid=" + paramOpenid;
+            }
+            request.response().redirect(url);
+            return;
+        }
         // TODO during the open and close time of the vote
-        request.put("canVote", !content.onlyWechat || Objects.nonNull(fetchedUser));
-
+        request.put("canVote", !content.onlyWechat || !fetchedUser.ipBased);
         request.response().render(DETAIL_HTML);
     }
 

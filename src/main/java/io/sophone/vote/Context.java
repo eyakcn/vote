@@ -101,10 +101,7 @@ class Context {
 
         SnsUser user = userMap.get(openid);
         if (user == null) {
-            user = new SnsUser();
-            user.openid = openid;
-            user.nickname = openid;
-            userMap.put(openid, user);
+            throw new RuntimeException("Some one does not submit voting on detail.html.");
         }
         user.reserveField = time; // backup vote time into reserve field, this design seems smell
         List<String> prevSelections = counting.fetchVoterChoices(openid);
