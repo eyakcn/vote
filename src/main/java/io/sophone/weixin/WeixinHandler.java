@@ -8,6 +8,8 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 
+import java.util.Objects;
+
 /**
  * @author eyakcn
  * @since 4/22/15 AD
@@ -57,7 +59,17 @@ public class WeixinHandler extends Middleware {
 
                 String body = request.<String>body();
                 logger.info("Request Body: " + body);
-                sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
+                String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
+                if (Objects.nonNull(reply)) {
+                    response.setStatusCode(200);
+                    response.putHeader("Content-Type", "application/xml");
+                    response.write(reply);
+                    response.end();
+                } else {
+                    // TODO the request not handled yet
+                    response.setStatusCode(200);
+                    response.end();
+                }
                 return;
         }
     }
