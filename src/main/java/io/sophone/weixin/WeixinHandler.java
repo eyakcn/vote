@@ -8,6 +8,7 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -44,11 +45,13 @@ public class WeixinHandler extends Middleware {
             case "GET":
                 // validation request from wechat server
                 String echostr = request.getParameter("echostr", "");
-                logger.info("Validating echo string: " + echostr);
+                logger.info("Echo String: " + echostr);
                 String validstr = sdk.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
+                logger.info("Valid String: " + validstr);
 
                 response.setStatusCode(200);
                 response.putHeader("Content-Type", "text/plain");
+                response.putHeader("Content-Length", validstr.getBytes(StandardCharsets.UTF_8).length + "");
                 response.write(validstr);
                 response.end();
                 return;
@@ -62,7 +65,8 @@ public class WeixinHandler extends Middleware {
                 String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
                 if (Objects.nonNull(reply)) {
                     response.setStatusCode(200);
-                    response.putHeader("Content-Type", "application/xml");
+                    response.putHeader("Content-Type", "application/xml;charset=utf-8");
+                    response.putHeader("Content-Length", reply.getBytes(StandardCharsets.UTF_8).length + "");
                     response.write(reply);
                     response.end();
                 } else {
