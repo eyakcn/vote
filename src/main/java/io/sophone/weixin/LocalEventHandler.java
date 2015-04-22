@@ -1,32 +1,26 @@
 package io.sophone.weixin;
 
-import io.sophone.weixin.message.ArticleItem;
-import io.sophone.weixin.message.OutgoingNewsMessage;
-import net.sinofool.wechat.mp.WeChatMP;
-import net.sinofool.wechat.mp.WeChatMPEventHandler;
-import net.sinofool.wechat.mp.msg.*;
-import net.sinofool.wechat.pay.WeChatPay;
+import io.sophone.sdk.wechat.WechatAPI;
+import io.sophone.sdk.wechat.WechatEventHandler;
+import io.sophone.sdk.wechat.message.arch.ReplyXMLFormat;
+import io.sophone.sdk.wechat.message.impl.IncomingClickEventMessage;
+import io.sophone.sdk.wechat.message.impl.IncomingTextMessage;
+import io.sophone.sdk.wechat.message.impl.OutgoingNewsMessage;
+import io.sophone.sdk.wechat.model.ArticleItem;
 
 import java.util.Arrays;
 
 /**
  * @author eyakcn
- * @since 4/22/15 AD
+ * @since 4/23/15 AD
  */
-public class VertxWechatEventHandler implements WeChatMPEventHandler {
-    private WeChatMP sdk;
+public class LocalEventHandler implements WechatEventHandler {
+    private WechatAPI sdk;
 
-    @Override
-    public void setWeChatMP(WeChatMP mpSDK) {
+    public void setWeChatMP(WechatAPI mpSDK) {
         sdk = mpSDK;
     }
 
-    @Override
-    public void setWeChatPay(WeChatPay paySDK) {
-        // TODO no need to use pay function currently
-    }
-
-    @Override
     public ReplyXMLFormat handle(IncomingTextMessage incoming) {
         OutgoingNewsMessage news = new OutgoingNewsMessage();
         news.setToUserName(incoming.getFromUserName());
@@ -40,27 +34,6 @@ public class VertxWechatEventHandler implements WeChatMPEventHandler {
         }
     }
 
-    @Override
-    public ReplyXMLFormat handle(IncomingSubscribeEventMessage incoming) {
-        return null;
-    }
-
-    @Override
-    public ReplyXMLFormat handle(IncomingSubscribeWithScanEventMessage incoming) {
-        return null;
-    }
-
-    @Override
-    public ReplyXMLFormat handle(IncomingScanEventMessage incoming) {
-        return null;
-    }
-
-    @Override
-    public ReplyXMLFormat handle(IncomingLocationEventMessage incoming) {
-        return null;
-    }
-
-    @Override
     public ReplyXMLFormat handle(IncomingClickEventMessage incoming) {
         OutgoingNewsMessage news = new OutgoingNewsMessage();
         news.setToUserName(incoming.getFromUserName());
@@ -70,11 +43,6 @@ public class VertxWechatEventHandler implements WeChatMPEventHandler {
             case "VOTE_SYS":
                 return wrapVoteNews(news);
         }
-        return null;
-    }
-
-    @Override
-    public ReplyXMLFormat handle(IncomingViewEventMessage incoming) {
         return null;
     }
 

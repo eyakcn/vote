@@ -1,6 +1,8 @@
-package io.sophone.weixin.message;
+package io.sophone.sdk.wechat.message.impl;
 
-import net.sinofool.wechat.mp.msg.ReplyXMLFormat;
+import io.sophone.sdk.wechat.message.arch.NewsMessage;
+import io.sophone.sdk.wechat.message.arch.ReplyXMLFormat;
+import io.sophone.sdk.wechat.model.ArticleItem;
 
 import java.text.MessageFormat;
 

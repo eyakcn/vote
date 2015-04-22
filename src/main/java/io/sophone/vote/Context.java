@@ -164,6 +164,5 @@ class Context {
             userLine = new Gson().toJson(user).replace("\r", "").replace("\n", "");
         }
         Context.recordUserLine(userLine);
-
     }
 }

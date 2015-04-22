@@ -1,6 +1,4 @@
-package io.sophone.weixin.message;
-
-import net.sinofool.wechat.mp.msg.Message;
+package io.sophone.sdk.wechat.message.arch;
 
 /**
  * @author eyakcn

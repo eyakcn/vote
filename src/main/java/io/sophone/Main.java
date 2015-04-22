@@ -21,9 +21,6 @@ public class Main extends Verticle {
     public void start() {
         container.logger().info("Temp dir: " + System.getProperty("java.io.tmpdir"));
 
-        WechatVoteHandler.setHttpClient(vertx.createHttpClient());
-        WechatVoteHandler.setContainer(container);
-
         QuestionnaireStatisticHandler.setContainer(container);
 
         Yoke app = new Yoke(vertx);
@@ -33,7 +30,7 @@ public class Main extends Verticle {
         app.use(new Limit(4096));
         app.use(new BodyParser());
         app.use("/weixin", new WeixinHandler(this));
-        app.use("/wechat/vote", new WechatVoteHandler());
+        app.use("/wechat/vote", new WechatVoteHandler(this));
         app.use("/wechat/bulletin/vote", new WechatVoteBulletinHandler());
         app.use("/osaka/counting", new QuestionnaireStatisticHandler());
         app.use("/webroot/", new Static("webroot/", 0));

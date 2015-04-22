@@ -4,7 +4,8 @@ import com.google.gson.Gson;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
-import io.sophone.wechat.Config;
+import io.sophone.sdk.wechat.WechatConfig;
+import io.sophone.wechat.LocalConfig;
 import io.sophone.wechat.OAuth2Token;
 import io.sophone.wechat.SnsUser;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,8 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Container;
+import org.vertx.java.core.logging.Logger;
+import org.vertx.java.platform.Verticle;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,35 +44,34 @@ public class WechatVoteHandler extends Middleware {
     private static final String INDEX_HTML = "wechat/vote/index.html";
     private static final String DETAIL_HTML = "wechat/vote/detail.html";
 
-    private static final Map<String, Map<String, YokeRequest>> countingRequestsMap = new ConcurrentHashMap<>();
-    private static HttpClient httpClient;
-    private static Container container;
+    private final Map<String, Map<String, YokeRequest>> countingRequestsMap = new ConcurrentHashMap<>();
+    private final WechatConfig config;
+    private final HttpClient httpClient;
+    private final Logger logger;
 
-    public static void setHttpClient(@NotNull HttpClient httpClient_) {
-        httpClient = httpClient_;
-        httpClient.setPort(443) // XXX ssl only works on 443, not 80 port
+    public WechatVoteHandler(Verticle verticle) {
+        config = new LocalConfig();
+        httpClient = verticle.getVertx().createHttpClient()
+                .setPort(443) // XXX ssl only works on 443, not 80 port
                 .setHost("api.weixin.qq.com")
                 .setSSL(true)
                 .setTrustAll(true)
                 .setKeepAlive(true)
                 .setMaxPoolSize(10);
-    }
-
-    public static void setContainer(Container container_) {
-        container = container_;
+        logger = verticle.getContainer().logger();
     }
 
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
-        container.logger().info(request.ip() + " " + request.method() + " " + request.uri());
+        logger.info(request.ip() + " " + request.method() + " " + request.uri());
         switch (request.method()) {
             case "GET":
                 String accept = request.getHeader("accept");
                 String contentId = request.getParameter("content-id");
                 if (Objects.equals("text/event-stream", accept)) {
                     // Counting request
-                    request.exceptionHandler(event -> container.logger().error("Counting Request Exception", event));
-                    request.response().exceptionHandler(event -> container.logger().error("Counting Response Exception", event));
+                    request.exceptionHandler(event -> logger.error("Counting Request Exception", event));
+                    request.response().exceptionHandler(event -> logger.error("Counting Response Exception", event));
                     String openid = request.getParameter("openid", request.ip());
                     if (Objects.nonNull(contentId)) {
                         Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
@@ -79,17 +80,17 @@ public class WechatVoteHandler extends Middleware {
                             countingRequestsMap.put(contentId, countingRequests);
                         }
                         countingRequests.put(openid, request);
-                        container.logger().info("New counting reqeust for " + contentId + " from " + openid);
+                        logger.info("New counting reqeust for " + contentId + " from " + openid);
                     }
                 } else if (Objects.isNull(contentId)) {
                     // index.html
-                    request.exceptionHandler(event -> container.logger().error("Index Page Request Exception", event));
-                    request.response().exceptionHandler(event -> container.logger().error("Index Page Response Exception", event));
+                    request.exceptionHandler(event -> logger.error("Index Page Request Exception", event));
+                    request.response().exceptionHandler(event -> logger.error("Index Page Response Exception", event));
                     handleGetIndex(request, next);
                 } else {
                     // detail.html
-                    request.exceptionHandler(event -> container.logger().error("Detail Page Request Exception", event));
-                    request.response().exceptionHandler(event -> container.logger().error("Detail Page Response Exception", event));
+                    request.exceptionHandler(event -> logger.error("Detail Page Request Exception", event));
+                    request.response().exceptionHandler(event -> logger.error("Detail Page Response Exception", event));
                     handleGetContent(request, next);
                 }
                 break;
@@ -97,8 +98,8 @@ public class WechatVoteHandler extends Middleware {
                 break;
             case "POST":
                 // submit voting request
-                request.exceptionHandler(event -> container.logger().error("Vote Request Exception", event));
-                request.response().exceptionHandler(event -> container.logger().error("Vote Response Exception", event));
+                request.exceptionHandler(event -> logger.error("Vote Request Exception", event));
+                request.response().exceptionHandler(event -> logger.error("Vote Response Exception", event));
                 handlePost(request, next);
                 break;
             case "DELETE":
@@ -122,7 +123,7 @@ public class WechatVoteHandler extends Middleware {
         request.put("contents", contents);
 
         String code = request.getParameter("code");
-        container.logger().info("Handle request with code = " + code);
+        logger.info("Handle request with code = " + code);
         // 服务号才能拿到授权访问用户信息，订阅号则不能，code用来换取Wechat服务器AccessToken，以进一步获取用户信息
         if (Objects.isNull(code)) {
             String paramOpenid = request.getParameter("openid");
@@ -139,9 +140,9 @@ public class WechatVoteHandler extends Middleware {
                 user.nickname = user.openid;
                 try {
                     Context.recordUser(user, null);
-                    container.logger().info("New user add to: " + Context.userFilePath);
+                    logger.info("New user add to: " + Context.userFilePath);
                 } catch (IOException e) {
-                    container.logger().error("Failed to write user file!" + e.toString());
+                    logger.error("Failed to write user file!" + e.toString());
                 }
             }
             request.put("user", user);
@@ -150,11 +151,11 @@ public class WechatVoteHandler extends Middleware {
             return;
         }
 
-        final String tokenUrl = MessageFormat.format(TOKEN_URL, Config.wechatId.appid, Config.wechatId.secret, code);
+        final String tokenUrl = MessageFormat.format(TOKEN_URL, config.getAppId(), config.getAppSecret(), code);
         HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
             OAuth2Token auth = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
             if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
-                container.logger().info("Succeed to get access token by using redirect code.");
+                logger.info("Succeed to get access token by using redirect code.");
 
                 SnsUser fetchedUser = Context.userMap.get(auth.openid);
                 if (fetchedUser == null) {
@@ -168,12 +169,12 @@ public class WechatVoteHandler extends Middleware {
 
                             try {
                                 Context.recordUser(user, userResBody.toString());
-                                container.logger().info("New user add to: " + Context.userFilePath);
+                                logger.info("New user add to: " + Context.userFilePath);
                             } catch (IOException e) {
-                                container.logger().error("Failed to write user file!" + e.toString());
+                                logger.error("Failed to write user file!" + e.toString());
                             }
                         } else {
-                            container.logger().error(user.errcode + ": " + user.errmsg);
+                            logger.error(user.errcode + ": " + user.errmsg);
                         }
                     }));
                     userReq.end();
@@ -183,7 +184,7 @@ public class WechatVoteHandler extends Middleware {
                     request.response().render(INDEX_HTML);
                 }
             } else {
-                container.logger().error(auth.errcode + ": " + auth.errmsg);
+                logger.error(auth.errcode + ": " + auth.errmsg);
             }
         }));
         tokenReq.end();
@@ -212,7 +213,7 @@ public class WechatVoteHandler extends Middleware {
             String openid = entry.getKey();
             YokeRequest countingRequest = entry.getValue();
             writeSseMessage(countingRequest.response(), responseText);
-            container.logger().info("Response counting request for " + contentId + " to " + openid);
+            logger.info("Response counting request for " + contentId + " to " + openid);
         }
     }
 
@@ -230,7 +231,7 @@ public class WechatVoteHandler extends Middleware {
             response.write(line);
         } catch (Throwable t) {
             // May catch nothing, should set exception handler for response object
-            container.logger().error("Counting Response Exception", t);
+            logger.error("Counting Response Exception", t);
         }
     }
 
@@ -312,9 +313,9 @@ public class WechatVoteHandler extends Middleware {
         File answerFile = new File(Context.answerFilePath);
         try {
             Files.write(answerFile.toPath(), lines, StandardOpenOption.APPEND);
-            container.logger().info("New answer add to: " + Context.answerFilePath);
+            logger.info("New answer add to: " + Context.answerFilePath);
         } catch (IOException e) {
-            container.logger().error("Failed to write answers file!" + e.toString());
+            logger.error("Failed to write answers file!" + e.toString());
         }
         request.response().end("true");
 

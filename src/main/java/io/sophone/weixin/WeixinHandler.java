@@ -3,6 +3,8 @@ package io.sophone.weixin;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
+import io.sophone.sdk.wechat.WechatAPI;
+import io.sophone.wechat.LocalConfig;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
@@ -19,7 +21,7 @@ import java.util.Objects;
 public class WeixinHandler extends Middleware {
     private final HttpClient http;
     private final Logger logger;
-    private final VertxWechat sdk;
+    private final WechatAPI sdk;
 
     public WeixinHandler(Verticle verticle) {
         http = verticle.getVertx().createHttpClient()
@@ -30,7 +32,7 @@ public class WeixinHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(20);
         logger = verticle.getContainer().logger();
-        sdk = new VertxWechat(http, logger);
+        sdk = new WechatAPI(new LocalConfig(), new LocalEventHandler(), logger);
     }
 
     @Override

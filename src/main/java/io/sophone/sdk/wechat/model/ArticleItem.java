@@ -1,4 +1,4 @@
-package io.sophone.weixin.message;
+package io.sophone.sdk.wechat.model;
 
 /**
  * @author eyakcn
