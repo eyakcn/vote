@@ -35,8 +35,7 @@ public class WeixinHandler extends Middleware {
 
     @Override
     public void handle(YokeRequest request, Handler<Object> next) {
-        logger.info(request.method() + " request: " + request.uri());
-        logger.info("From IP: " + request.ip());
+        logger.info(request.ip() + " " + request.method() + " " + request.uri());
 
         YokeResponse response = request.response();
         String signature = request.getParameter("signature");
@@ -48,9 +47,9 @@ public class WeixinHandler extends Middleware {
                 case "GET":
                     // validation request from wechat server
                     String echostr = request.getParameter("echostr", "");
-                    logger.info("Echo String: " + echostr);
+                    logger.info("Request Echo String: " + echostr);
                     String validstr = sdk.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
-                    logger.info("Valid String: " + validstr);
+                    logger.info("Response Valid String: " + validstr);
 
                     response.setStatusCode(200);
                     response.putHeader("Content-Type", "text/plain");
@@ -64,7 +63,7 @@ public class WeixinHandler extends Middleware {
                     String msgSignature = request.getParameter("msg_signature");
 
                     String body = request.<Buffer>body().toString();
-                    logger.info("Request Body: " + body);
+                    logger.info("Request " + request.ip() + "\n" + body);
                     String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
                     if (Objects.nonNull(reply)) {
                         response.setStatusCode(200);
@@ -72,11 +71,13 @@ public class WeixinHandler extends Middleware {
                         response.putHeader("Content-Length", reply.getBytes(StandardCharsets.UTF_8).length + "");
                         response.write(reply);
                         response.end();
+                        logger.info("Response " + request.ip() + "\n" + reply);
                     } else {
                         // TODO the request not handled yet
                         response.setStatusCode(400);
                         response.setStatusMessage("Not supported yet.");
                         response.end();
+                        logger.warn("Response nothing to " + request.ip());
                     }
                     return;
             }
@@ -84,6 +85,7 @@ public class WeixinHandler extends Middleware {
             response.setStatusCode(500);
             response.setStatusMessage(t.getMessage());
             response.end();
+            logger.error("Failed as Weixin server.", t);
         }
     }
 }
