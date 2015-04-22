@@ -21,6 +21,10 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -121,18 +125,27 @@ public class WechatVoteHandler extends Middleware {
         container.logger().info("Handle request with code = " + code);
         // 服务号才能拿到授权访问用户信息，订阅号则不能，code用来换取Wechat服务器AccessToken，以进一步获取用户信息
         if (Objects.isNull(code)) {
-            SnsUser user = new SnsUser();
-            String openid = request.getParameter("openid");
-            if (Objects.nonNull(openid)) {
-                user.openid = openid;
-            } else {
-                user.openid = request.ip();
-                user.ipBased = true;
+            String paramOpenid = request.getParameter("openid");
+            String userMapKey = request.getParameter("openid", request.ip());
+            SnsUser user = Context.userMap.get(userMapKey);
+            if (Objects.isNull(user)) {
+                user = new SnsUser();
+                if (Objects.nonNull(paramOpenid)) {
+                    user.openid = paramOpenid;
+                } else {
+                    user.openid = request.ip();
+                    user.ipBased = true;
+                }
+                user.nickname = user.openid;
+                try {
+                    Context.recordUser(user, null);
+                    container.logger().info("New user add to: " + Context.userFilePath);
+                } catch (IOException e) {
+                    container.logger().error("Failed to write user file!" + e.toString());
+                }
             }
-            user.nickname = user.openid;
-            Context.userMap.put(user.openid, user);
             request.put("user", user);
-            request.put("votedIds", getVotedContentIds(request.ip()));
+            request.put("votedIds", getVotedContentIds(user.openid));
             request.response().render(INDEX_HTML);
             return;
         }
@@ -153,12 +166,8 @@ public class WechatVoteHandler extends Middleware {
                             request.put("votedIds", getVotedContentIds(user.openid));
                             request.response().render(INDEX_HTML);
 
-                            Context.userMap.put(user.openid, user);
-                            List<String> lines = new ArrayList<>();
-                            lines.add(userResBody.toString());
-                            File userFile = new File(Context.userFilePath);
                             try {
-                                Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
+                                Context.recordUser(user, userResBody.toString());
                                 container.logger().info("New user add to: " + Context.userFilePath);
                             } catch (IOException e) {
                                 container.logger().error("Failed to write user file!" + e.toString());
@@ -244,9 +253,39 @@ public class WechatVoteHandler extends Middleware {
             request.response().redirect(url);
             return;
         }
-        // TODO during the open and close time of the vote
-        request.put("canVote", !content.onlyWechat || !fetchedUser.ipBased);
+
+        boolean legalVoter = !(content.onlyWechat && fetchedUser.ipBased);
+        boolean legalTime = true;
+        long currentMilli = System.currentTimeMillis();
+        if (!StringUtils.isBlank(content.startDate)) {
+            long startMilli = getDateTimeMillis(content.startDate);
+            legalTime = legalTime && (currentMilli >= startMilli);
+        }
+        if (legalTime && !StringUtils.isBlank(content.endDate)) {
+            long endMilli = getDateTimeMillis(content.endDate);
+            legalTime = legalTime && (currentMilli <= endMilli);
+        }
+        request.put("canVote", legalVoter && legalTime);
+
+        // Warning message
+        String message = null;
+        if (!legalVoter) {
+            message = "警告：只有微信用户可参与投票!";
+        } else if (!legalTime) {
+            message = "警告：投票时间 " + content.startDate + " ~ " + content.endDate;
+        }
+        if (Objects.nonNull(message)) {
+            request.put("warning", message);
+        }
+
         request.response().render(DETAIL_HTML);
+    }
+
+    private long getDateTimeMillis(String str) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+        ZonedDateTime zonedDateTime = dateTime.atZone(ZoneId.of("Asia/Shanghai"));
+        return zonedDateTime.toInstant().toEpochMilli();
     }
 
     private void handlePost(YokeRequest request, Handler<Object> next) {

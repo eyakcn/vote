@@ -98,6 +98,7 @@
     <details open="true" class="col-xs-12">
       <summary>
         <a th:text="*{title + '(参与人数：' + count + ')'}"></a>
+        <pre th:if="${warning}" th:text="${warning}" style="background-color: white; color: red; border: none;"></pre>
       </summary>
 
       <pre th:text="*{text}"></pre>

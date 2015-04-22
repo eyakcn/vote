@@ -1,5 +1,6 @@
 package io.sophone.vote;
 
+import com.google.gson.Gson;
 import com.jetdrone.vertx.yoke.core.JSON;
 import io.sophone.wechat.SnsUser;
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +10,7 @@ import org.vertx.java.core.json.impl.Json;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -146,5 +148,22 @@ class Context {
         for (VoteCandidate candidate : content.candidates) {
             candidate.count = voteCounting.getVotersCountOf(candidate.caption);
         }
+    }
+
+    private static void recordUserLine(String userLine) throws IOException {
+        List<String> lines = new ArrayList<>();
+        lines.add(userLine);
+        File userFile = new File(Context.userFilePath);
+        Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
+    }
+
+    static void recordUser(SnsUser user, String line) throws IOException {
+        Context.userMap.put(user.openid, user);
+        String userLine = line;
+        if (Objects.isNull(userLine)) {
+            userLine = new Gson().toJson(user).replace("\r", "").replace("\n", "");
+        }
+        Context.recordUserLine(userLine);
+
     }
 }

@@ -46,7 +46,6 @@
     <commonlang.version>3.4</commonlang.version>
     <thymeleaf.version>2.1.4.RELEASE</thymeleaf.version>
     <slf4j.version>1.7.12</slf4j.version>
-    <wechat.version>1.4.4</wechat.version>
 
     <!--Plugin versions-->
     <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
@@ -69,9 +68,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>cc.jinglupeng</groupId>
+      <artifactId>wechat</artifactId>
+      <version>1.2.2</version>
+    </dependency>
+    <dependency>
       <groupId>net.sinofool</groupId>
       <artifactId>wechat-java-sdk</artifactId>
-      <version>${wechat.version}</version>
+      <version>1.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
