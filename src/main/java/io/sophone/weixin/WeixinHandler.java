@@ -4,6 +4,7 @@ import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
@@ -41,40 +42,48 @@ public class WeixinHandler extends Middleware {
         String signature = request.getParameter("signature");
         String timestamp = request.getParameter("timestamp");
         String nonce = request.getParameter("nonce");
-        switch (request.method()) {
-            case "GET":
-                // validation request from wechat server
-                String echostr = request.getParameter("echostr", "");
-                logger.info("Echo String: " + echostr);
-                String validstr = sdk.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
-                logger.info("Valid String: " + validstr);
 
-                response.setStatusCode(200);
-                response.putHeader("Content-Type", "text/plain");
-                response.putHeader("Content-Length", validstr.getBytes(StandardCharsets.UTF_8).length + "");
-                response.write(validstr);
-                response.end();
-                return;
-            case "POST":
-                // user message sent from wechat server
-                String encryptType = request.getParameter("encrypt_type");
-                String msgSignature = request.getParameter("msg_signature");
+        try {
+            switch (request.method()) {
+                case "GET":
+                    // validation request from wechat server
+                    String echostr = request.getParameter("echostr", "");
+                    logger.info("Echo String: " + echostr);
+                    String validstr = sdk.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
+                    logger.info("Valid String: " + validstr);
 
-                String body = request.<String>body();
-                logger.info("Request Body: " + body);
-                String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
-                if (Objects.nonNull(reply)) {
                     response.setStatusCode(200);
-                    response.putHeader("Content-Type", "application/xml;charset=utf-8");
-                    response.putHeader("Content-Length", reply.getBytes(StandardCharsets.UTF_8).length + "");
-                    response.write(reply);
+                    response.putHeader("Content-Type", "text/plain");
+                    response.putHeader("Content-Length", validstr.getBytes(StandardCharsets.UTF_8).length + "");
+                    response.write(validstr);
                     response.end();
-                } else {
-                    // TODO the request not handled yet
-                    response.setStatusCode(200);
-                    response.end();
-                }
-                return;
+                    return;
+                case "POST":
+                    // user message sent from wechat server
+                    String encryptType = request.getParameter("encrypt_type");
+                    String msgSignature = request.getParameter("msg_signature");
+
+                    String body = request.<Buffer>body().toString();
+                    logger.info("Request Body: " + body);
+                    String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
+                    if (Objects.nonNull(reply)) {
+                        response.setStatusCode(200);
+                        response.putHeader("Content-Type", "application/xml;charset=utf-8");
+                        response.putHeader("Content-Length", reply.getBytes(StandardCharsets.UTF_8).length + "");
+                        response.write(reply);
+                        response.end();
+                    } else {
+                        // TODO the request not handled yet
+                        response.setStatusCode(400);
+                        response.setStatusMessage("Not supported yet.");
+                        response.end();
+                    }
+                    return;
+            }
+        } catch (Throwable t) {
+            response.setStatusCode(500);
+            response.setStatusMessage(t.getMessage());
+            response.end();
         }
     }
 }
