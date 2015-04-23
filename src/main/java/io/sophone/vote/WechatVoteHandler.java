@@ -122,7 +122,6 @@ public class WechatVoteHandler extends Middleware {
         }
     }
 
-    // FIXME no check on Wechat user based on openid
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
         List<VoteContent> contents = Context.getVoteContentList();
         request.put("contents", contents);
@@ -206,7 +205,6 @@ public class WechatVoteHandler extends Middleware {
         request.response().render(INDEX_HTML);
     }
 
-    // FIXME Bug: the succeed submit followed by a failure submit
     private void refreshCounting(String contentId) {
         VoteContent voteContent = Context.getVoteContent(contentId);
 

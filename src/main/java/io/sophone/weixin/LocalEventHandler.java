@@ -29,7 +29,7 @@ public class LocalEventHandler implements WechatEventHandler {
         if ("投票".equals(incoming.getContent())) {
             return wrapVoteNews(news);
         } else {
-            // TODO other handling except voting
+            // other handling except voting
             return null;
         }
     }

@@ -2,6 +2,8 @@ package io.sophone.sdk.wechat.message.impl;
 
 import io.sophone.sdk.wechat.WechatException;
 import io.sophone.sdk.wechat.message.arch.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -13,8 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 
 public class Messages {
-    // TODO use vertx logger
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Messages.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Messages.class);
 
     public static Message parseIncoming(final String xml) {
         try {

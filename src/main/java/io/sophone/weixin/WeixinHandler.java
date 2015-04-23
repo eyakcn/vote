@@ -75,7 +75,6 @@ public class WeixinHandler extends Middleware {
                         response.end();
                         logger.info("Response " + request.ip() + "\n" + reply);
                     } else {
-                        // TODO the request not handled yet
                         response.setStatusCode(400);
                         response.setStatusMessage("Not supported yet.");
                         response.end();
