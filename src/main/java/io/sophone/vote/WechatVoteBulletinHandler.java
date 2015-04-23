@@ -2,7 +2,7 @@ package io.sophone.vote;
 
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
-import io.sophone.wechat.SnsUser;
+import io.sophone.wechat.User;
 import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +47,7 @@ public class WechatVoteBulletinHandler extends Middleware {
         }
 
         return content.candidates.stream().map(candidate -> {
-            List<SnsUser> voters = counting.getVotersOf(candidate.caption);
+            List<User> voters = counting.getVotersOf(candidate.caption);
             List<String> voterNames = voters.stream()
                     .map(voter -> voter.nickname)
                     .collect(Collectors.toList());

@@ -7,7 +7,7 @@ import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.sdk.wechat.WechatConfig;
 import io.sophone.wechat.LocalConfig;
 import io.sophone.wechat.OAuth2Token;
-import io.sophone.wechat.SnsUser;
+import io.sophone.wechat.User;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.vertx.java.core.Handler;
@@ -127,9 +127,9 @@ public class WechatVoteHandler extends Middleware {
         if (Objects.isNull(code)) {
             String paramOpenid = request.getParameter("openid");
             String userMapKey = request.getParameter("openid", request.ip());
-            SnsUser user = Context.userMap.get(userMapKey);
+            User user = Context.userMap.get(userMapKey);
             if (Objects.isNull(user)) {
-                user = new SnsUser();
+                user = new User();
                 if (Objects.nonNull(paramOpenid)) {
                     user.openid = paramOpenid;
                 } else {
@@ -156,11 +156,11 @@ public class WechatVoteHandler extends Middleware {
             if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
                 logger.info("Succeed to get access token by using redirect code.");
 
-                SnsUser fetchedUser = Context.userMap.get(auth.openid);
+                User fetchedUser = Context.userMap.get(auth.openid);
                 if (fetchedUser == null) {
                     final String userUrl = MessageFormat.format(USRINFO_URL, auth.access_token, auth.openid);
                     HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
-                        SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
+                        User user = new Gson().fromJson(userResBody.toString(), User.class);
                         if (Objects.isNull(user.errcode)) {
                             request.put("user", user);
                             request.put("votedIds", Context.getVotedContentIds(user.openid));
@@ -234,7 +234,7 @@ public class WechatVoteHandler extends Middleware {
         request.put("content", content);
 
         String openid = request.getParameter("openid", request.ip());
-        SnsUser fetchedUser = Context.userMap.get(openid);
+        User fetchedUser = Context.userMap.get(openid);
         if (Objects.isNull(fetchedUser)) {
             // XXX user skipped index page, and access detail page directly
             String url = "/wechat/vote";
@@ -297,6 +297,7 @@ public class WechatVoteHandler extends Middleware {
         }
         answer.putString("ip", request.ip());
         answer.putString("content-id", contentId);
+        // TODO strict check about the voting time
         Context.analyzeAnswer(answer);
 
         String line = answer.encode();

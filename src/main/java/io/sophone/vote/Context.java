@@ -2,7 +2,7 @@ package io.sophone.vote;
 
 import com.google.gson.Gson;
 import com.jetdrone.vertx.yoke.core.JSON;
-import io.sophone.wechat.SnsUser;
+import io.sophone.wechat.User;
 import org.apache.commons.lang3.StringUtils;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.json.impl.Json;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Created by yuanyuan on 10/18/14 AD.
  */
 class Context {
-    static final Map<String, SnsUser> userMap = new ConcurrentHashMap<>();
+    static final Map<String, User> userMap = new ConcurrentHashMap<>();
     static final Map<String, VoteCounting> voteCountingMap = new ConcurrentHashMap<>();
     static final Map<String, VoteContent> voteContentMap = new ConcurrentHashMap<>();
     static final String baseDir = System.getProperty("user.home") + "/wechat/vote/";
@@ -76,7 +76,7 @@ class Context {
             if (userFile.exists()) {
                 List<String> lines = Files.readAllLines(userFile.toPath());
                 lines.forEach(line -> {
-                    SnsUser user = Json.decodeValue(line, SnsUser.class);
+                    User user = Json.decodeValue(line, User.class);
                     userMap.put(user.openid, user);
                 });
             } else {
@@ -93,7 +93,6 @@ class Context {
             return;
         }
         String contentId = answer.getString("content-id");
-        String time = answer.getString("time");
         List<String> selections = (List<String>) answer.getArray("selections").toList();
 
         VoteCounting counting = voteCountingMap.get(contentId);
@@ -102,11 +101,10 @@ class Context {
             voteCountingMap.put(contentId, counting);
         }
 
-        SnsUser user = userMap.get(openid);
+        User user = userMap.get(openid);
         if (Objects.isNull(user)) {
             throw new RuntimeException("Some one does not submit voting on detail.html.");
         }
-        user.reserveField = time; // backup vote time into reserve field, this design seems smell
         List<String> prevSelections = counting.fetchVoterChoices(openid);
         if (Objects.nonNull(prevSelections)) {
             counting.removeVoterFromChoices(prevSelections, openid);
@@ -158,7 +156,7 @@ class Context {
         Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
     }
 
-    static void recordUser(SnsUser user, String line) throws IOException {
+    static void recordUser(User user, String line) throws IOException {
         Context.userMap.put(user.openid, user);
         String userLine = line;
         if (Objects.isNull(userLine)) {

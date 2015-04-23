@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Created by eyakcn on 2014/10/13.
  */
-public final class SnsUser {
+public final class User {
     public boolean ipBased = false; // the openid is based on the IP address
     public String openid; // 用户的唯一标识
     public String nickname; // 用户昵称
@@ -22,20 +22,18 @@ public final class SnsUser {
     public String errcode;
     public String errmsg;
 
-    public String reserveField;
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof SnsUser)) {
+        if (!(obj instanceof User)) {
             return false;
         }
-        if (openid == null && ((SnsUser) obj).openid == null) {
+        if (openid == null && ((User) obj).openid == null) {
             return true;
         }
-        return openid != null && openid.equals(((SnsUser) obj).openid);
+        return openid != null && openid.equals(((User) obj).openid);
     }
 
     @Override

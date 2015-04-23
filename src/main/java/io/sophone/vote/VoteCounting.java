@@ -1,6 +1,6 @@
 package io.sophone.vote;
 
-import io.sophone.wechat.SnsUser;
+import io.sophone.wechat.User;
 import org.vertx.java.core.impl.ConcurrentHashSet;
 
 import java.util.*;
@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoteCounting {
     private final String id;
     private final Map<String, List<String>> voterChoicesMap = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, SnsUser>> choiceVotersMap = new ConcurrentHashMap<>();
-    private final Set<SnsUser> voterSet = new ConcurrentHashSet<>();
+    private final Map<String, Map<String, User>> choiceVotersMap = new ConcurrentHashMap<>();
+    private final Set<User> voterSet = new ConcurrentHashSet<>();
 
     public VoteCounting(String id) {
         this.id = id;
@@ -29,16 +29,16 @@ public class VoteCounting {
 
     public void removeVoterFromChoices(List<String> choices, String openid) {
         for (String choice : choices) {
-            Map<String, SnsUser> usersMap = choiceVotersMap.get(choice);
+            Map<String, User> usersMap = choiceVotersMap.get(choice);
             if (usersMap != null) {
                 usersMap.remove(openid);
             }
         }
     }
 
-    public void addVoterToChoices(List<String> choices, SnsUser voter) {
+    public void addVoterToChoices(List<String> choices, User voter) {
         for (String chioce : choices) {
-            Map<String, SnsUser> usersMap = choiceVotersMap.get(chioce);
+            Map<String, User> usersMap = choiceVotersMap.get(chioce);
             if (usersMap == null) {
                 usersMap = new ConcurrentHashMap<>();
                 choiceVotersMap.put(chioce, usersMap);
@@ -47,7 +47,7 @@ public class VoteCounting {
         }
     }
 
-    public void recordVoter(SnsUser voter) {
+    public void recordVoter(User voter) {
         if (Objects.nonNull(voter)) {
             voterSet.add(voter);
         }
@@ -57,13 +57,13 @@ public class VoteCounting {
         return voterSet.size();
     }
 
-    public List<SnsUser> getVotersOf(String caption) {
-        Map<String, SnsUser> voterMap = choiceVotersMap.get(caption);
+    public List<User> getVotersOf(String caption) {
+        Map<String, User> voterMap = choiceVotersMap.get(caption);
         return Objects.isNull(voterMap) ? new ArrayList<>() : new ArrayList<>(voterMap.values());
     }
 
     public int getVotersCountOf(String caption) {
-        Map<String, SnsUser> voterMap = choiceVotersMap.get(caption);
+        Map<String, User> voterMap = choiceVotersMap.get(caption);
         return Objects.isNull(voterMap) ? 0 : voterMap.size();
     }
 
