@@ -176,6 +176,7 @@ public class WechatVoteHandler extends Middleware {
                             logger.error(user.errcode + ": " + user.errmsg);
                         }
                     }));
+                    userReq.exceptionHandler(t -> logger.error("Request of fetch OAuth2 user failed.", t));
                     userReq.end();
                 } else {
                     responseIndexPage(request, fetchedUser);
@@ -184,6 +185,7 @@ public class WechatVoteHandler extends Middleware {
                 logger.error(auth.errcode + ": " + auth.errmsg);
             }
         }));
+        tokenReq.exceptionHandler(t -> logger.error("Request of fetch OAuth2 token failed.", t));
         tokenReq.end();
     }
 
@@ -224,6 +226,7 @@ public class WechatVoteHandler extends Middleware {
     }
 
     private void writeSseMessage(YokeResponse response, String line) {
+        response.setStatusCode(200);
         response.putHeader("Content-Type", "text/event-stream");
         try {
             response.putHeader("Content-Length", line.getBytes("UTF-8").length + "");
@@ -231,10 +234,12 @@ public class WechatVoteHandler extends Middleware {
             throw new RuntimeException(e);
         }
         response.putHeader("Cache-Control", "no-cache");
+        response.putHeader("Connection", "keep-alive");
 
         // TODO remove counting request from map when the connection is not alive
         try {
             response.write(line);
+            response.end(); // XXX is it ok to close SSE message response
         } catch (Throwable t) {
             // May catch nothing, should set exception handler for response object
             logger.error("Counting Response Exception", t);

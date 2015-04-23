@@ -32,7 +32,7 @@
       <a th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
          th:class="'list-group-item' + ${voted ? ' voted' : ''}">
         <h4 class="list-group-item-heading"
-            th:text="${(voted ? '(您已投)' : '') + '［编号: ' + content.id + '］' + content.title}"></h4>
+            th:text="${(voted ? '(您已投)' : '') + content.title}"></h4>
 
         <pre th:unless="${voted}" class="list-group-item-text" th:text="${content.text}"></pre>
       </a>
