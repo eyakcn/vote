@@ -39,7 +39,8 @@
     <vertx.version>2.1.5</vertx.version>
     <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
     <junit.version>4.12</junit.version>
-    <yoke.version>2.0.7</yoke.version>
+    <yoke.version>2.0.17</yoke.version>
+    <yoke-extras.version>2.0.13</yoke-extras.version>
     <xstream.version>1.4.8</xstream.version>
     <json.version>2.3.1</json.version>
     <annotation.version>13.0</annotation.version>
@@ -71,6 +72,12 @@
       <groupId>cc.jinglupeng</groupId>
       <artifactId>wechat</artifactId>
       <version>1.2.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -105,7 +112,7 @@
     <dependency>
       <groupId>com.jetdrone</groupId>
       <artifactId>yoke-extras</artifactId>
-      <version>${yoke.version}</version>
+      <version>${yoke-extras.version}</version>
     </dependency>
     <dependency>
       <groupId>com.jetdrone</groupId>
