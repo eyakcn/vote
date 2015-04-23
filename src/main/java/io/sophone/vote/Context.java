@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Created by yuanyuan on 10/18/14 AD.
@@ -96,18 +97,18 @@ class Context {
         List<String> selections = (List<String>) answer.getArray("selections").toList();
 
         VoteCounting counting = voteCountingMap.get(contentId);
-        if (counting == null) {
+        if (Objects.isNull(counting)) {
             counting = new VoteCounting(contentId);
             voteCountingMap.put(contentId, counting);
         }
 
         SnsUser user = userMap.get(openid);
-        if (user == null) {
+        if (Objects.isNull(user)) {
             throw new RuntimeException("Some one does not submit voting on detail.html.");
         }
         user.reserveField = time; // backup vote time into reserve field, this design seems smell
         List<String> prevSelections = counting.fetchVoterChoices(openid);
-        if (prevSelections != null) {
+        if (Objects.nonNull(prevSelections)) {
             counting.removeVoterFromChoices(prevSelections, openid);
         }
 
@@ -164,5 +165,22 @@ class Context {
             userLine = new Gson().toJson(user).replace("\r", "").replace("\n", "");
         }
         Context.recordUserLine(userLine);
+    }
+
+    static List<String> getVotedContentIds(String openid) {
+        List<String> ids = voteCountingMap.entrySet().stream()
+                .filter(entry -> entry.getValue().alreadyVoted(openid))
+                .map(entry -> entry.getKey())
+                .collect(Collectors.toList());
+        return ids;
+    }
+
+    static List<String> getVoteChoices(String contentId, String openid) {
+        VoteCounting counting = voteCountingMap.get(contentId);
+        if (Objects.isNull(counting)) {
+            return Collections.EMPTY_LIST;
+        }
+        List<String> choices = counting.fetchVoterChoices(openid);
+        return Objects.nonNull(choices) ? choices : Collections.EMPTY_LIST;
     }
 }

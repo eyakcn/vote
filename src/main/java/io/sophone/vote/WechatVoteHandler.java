@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Created by eyakcn on 2014/10/13.
@@ -146,7 +145,7 @@ public class WechatVoteHandler extends Middleware {
                 }
             }
             request.put("user", user);
-            request.put("votedIds", getVotedContentIds(user.openid));
+            request.put("votedIds", Context.getVotedContentIds(user.openid));
             request.response().render(INDEX_HTML);
             return;
         }
@@ -164,7 +163,7 @@ public class WechatVoteHandler extends Middleware {
                         SnsUser user = new Gson().fromJson(userResBody.toString(), SnsUser.class);
                         if (Objects.isNull(user.errcode)) {
                             request.put("user", user);
-                            request.put("votedIds", getVotedContentIds(user.openid));
+                            request.put("votedIds", Context.getVotedContentIds(user.openid));
                             request.response().render(INDEX_HTML);
 
                             try {
@@ -180,7 +179,7 @@ public class WechatVoteHandler extends Middleware {
                     userReq.end();
                 } else {
                     request.put("user", fetchedUser);
-                    request.put("votedIds", getVotedContentIds(fetchedUser.openid));
+                    request.put("votedIds", Context.getVotedContentIds(fetchedUser.openid));
                     request.response().render(INDEX_HTML);
                 }
             } else {
@@ -188,14 +187,6 @@ public class WechatVoteHandler extends Middleware {
             }
         }));
         tokenReq.end();
-    }
-
-    private List<String> getVotedContentIds(String openid) {
-        List<String> ids = Context.voteCountingMap.entrySet().stream()
-                .filter(entry -> entry.getValue().alreadyVoted(openid))
-                .map(entry -> entry.getKey())
-                .collect(Collectors.toList());
-        return ids;
     }
 
     // FIXME Bug: the succeed submit followed by a failure submit
@@ -254,6 +245,7 @@ public class WechatVoteHandler extends Middleware {
             request.response().redirect(url);
             return;
         }
+        request.put("choices", Context.getVoteChoices(contentId, openid));
 
         boolean legalVoter = !(content.onlyWechat && fetchedUser.ipBased);
         boolean legalTime = true;

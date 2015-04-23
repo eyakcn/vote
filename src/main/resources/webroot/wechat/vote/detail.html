@@ -110,7 +110,7 @@
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
     <div>
-      <input type="checkbox" th:if="${canVote}"/>
+      <input type="checkbox" th:if="${canVote}" th:checked="${choices.contains(candidate.caption)}"/>
       <input type="hidden" th:value="${candidate.caption}"/>
     </div>
     <details open="true" th:object="${candidate}" class="col-xs-12">
