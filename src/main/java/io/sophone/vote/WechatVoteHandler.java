@@ -239,7 +239,7 @@ public class WechatVoteHandler extends Middleware {
         // TODO remove counting request from map when the connection is not alive
         try {
             response.write(line);
-            response.end(); // XXX is it ok to close SSE message response
+            response.end(); // XXX must end SSE message response
         } catch (Throwable t) {
             // May catch nothing, should set exception handler for response object
             logger.error("Counting Response Exception", t);
@@ -265,7 +265,8 @@ public class WechatVoteHandler extends Middleware {
             request.response().redirect(url);
             return;
         }
-        request.put("choices", Context.getVoteChoices(contentId, openid));
+        List<String> choices = Context.getVoteChoices(contentId, openid);
+        request.put("choices", choices);
 
         boolean legalVoter = !(content.onlyWechat && fetchedUser.ipBased);
         boolean legalTime = true;
@@ -278,7 +279,9 @@ public class WechatVoteHandler extends Middleware {
             long endMilli = getDateTimeMillis(content.endDate);
             legalTime = legalTime && (currentMilli <= endMilli);
         }
-        request.put("canVote", legalVoter && legalTime);
+        boolean voted = choices.size() > 0;
+        boolean legalChance = content.canModify || !voted;
+        request.put("canVote", legalVoter && legalTime && legalChance);
 
         // Warning message
         String message = null;
@@ -286,6 +289,8 @@ public class WechatVoteHandler extends Middleware {
             message = "警告：只有微信用户可参与投票!";
         } else if (!legalTime) {
             message = "警告：投票时间 " + content.startDate + " ~ " + content.endDate;
+        } else if (!legalChance) {
+            message = "警告：您只有一次投票机会，上次提交" + StringUtils.join(choices);
         }
         if (Objects.nonNull(message)) {
             request.put("warning", message);
