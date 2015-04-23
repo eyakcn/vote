@@ -10,16 +10,19 @@ import io.sophone.questionnaire.QuestionnaireStatisticHandler;
 import io.sophone.vote.WechatVoteBulletinHandler;
 import io.sophone.vote.WechatVoteHandler;
 import io.sophone.weixin.WeixinHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.platform.Verticle;
 
 /**
  * Created by eyakcn on 2014/8/20.
  */
 public class Main extends Verticle {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     @Override
     public void start() {
-        container.logger().info("Temp dir: " + System.getProperty("java.io.tmpdir"));
+        logger.info("Temp dir: " + System.getProperty("java.io.tmpdir"));
 
         QuestionnaireStatisticHandler.setContainer(container);
 

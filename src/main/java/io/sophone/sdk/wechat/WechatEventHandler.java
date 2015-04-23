@@ -9,7 +9,7 @@ import io.sophone.sdk.wechat.message.impl.*;
  */
 public interface WechatEventHandler {
 
-    void setWeChatMP(WechatAPI mpSDK);
+    void setWeChatMP(WechatApi mpSDK);
 
     default ReplyXMLFormat handle(IncomingTextMessage incoming) {
         return null;

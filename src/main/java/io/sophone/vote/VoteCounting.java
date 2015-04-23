@@ -1,6 +1,6 @@
 package io.sophone.vote;
 
-import io.sophone.wechat.User;
+import io.sophone.sdk.wechat.model.User;
 import org.vertx.java.core.impl.ConcurrentHashSet;
 
 import java.util.*;

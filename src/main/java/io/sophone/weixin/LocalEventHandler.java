@@ -1,6 +1,6 @@
 package io.sophone.weixin;
 
-import io.sophone.sdk.wechat.WechatAPI;
+import io.sophone.sdk.wechat.WechatApi;
 import io.sophone.sdk.wechat.WechatEventHandler;
 import io.sophone.sdk.wechat.message.arch.ReplyXMLFormat;
 import io.sophone.sdk.wechat.message.impl.IncomingClickEventMessage;
@@ -15,9 +15,9 @@ import java.util.Arrays;
  * @since 4/23/15 AD
  */
 public class LocalEventHandler implements WechatEventHandler {
-    private WechatAPI sdk;
+    private WechatApi sdk;
 
-    public void setWeChatMP(WechatAPI mpSDK) {
+    public void setWeChatMP(WechatApi mpSDK) {
         sdk = mpSDK;
     }
 

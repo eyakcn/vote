@@ -3,7 +3,7 @@ package io.sophone.weixin;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
-import io.sophone.sdk.wechat.WechatAPI;
+import io.sophone.sdk.wechat.WechatApi;
 import io.sophone.wechat.LocalConfig;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
@@ -21,7 +21,7 @@ import java.util.Objects;
 public class WeixinHandler extends Middleware {
     private final HttpClient http;
     private final Logger logger;
-    private final WechatAPI sdk;
+    private final WechatApi wechatApi;
 
     public WeixinHandler(Verticle verticle) {
         http = verticle.getVertx().createHttpClient()
@@ -32,7 +32,7 @@ public class WeixinHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(20);
         logger = verticle.getContainer().logger();
-        sdk = new WechatAPI(new LocalConfig(), new LocalEventHandler(), logger);
+        wechatApi = new WechatApi(new LocalConfig(), new LocalEventHandler());
     }
 
     @Override
@@ -50,7 +50,7 @@ public class WeixinHandler extends Middleware {
                     // validation request from wechat server
                     String echostr = request.getParameter("echostr", "");
                     logger.info("Request Echo String: " + echostr);
-                    String validstr = sdk.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
+                    String validstr = wechatApi.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
                     logger.info("Response Valid String: " + validstr);
 
                     response.setStatusCode(200);
@@ -66,7 +66,7 @@ public class WeixinHandler extends Middleware {
 
                     String body = request.<Buffer>body().toString();
                     logger.info("Request " + request.ip() + "\n" + body);
-                    String reply = sdk.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
+                    String reply = wechatApi.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
                     if (Objects.nonNull(reply)) {
                         response.setStatusCode(200);
                         response.putHeader("Content-Type", "application/xml;charset=utf-8");

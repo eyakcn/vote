@@ -5,16 +5,18 @@ import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.sdk.wechat.WechatConfig;
+import io.sophone.sdk.wechat.model.OAuth2Token;
+import io.sophone.sdk.wechat.model.User;
+import io.sophone.sdk.wechat.service.communicate.UserApi;
 import io.sophone.wechat.LocalConfig;
-import io.sophone.wechat.OAuth2Token;
-import io.sophone.wechat.User;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.logging.Logger;
 import org.vertx.java.platform.Verticle;
 
 import java.io.File;
@@ -37,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by eyakcn on 2014/10/13.
  */
 public class WechatVoteHandler extends Middleware {
+    private static final Logger logger = LoggerFactory.getLogger(WechatVoteHandler.class);
+
     private static final String TOKEN_URL = "/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
     private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
 
@@ -45,19 +49,21 @@ public class WechatVoteHandler extends Middleware {
 
     private final Map<String, Map<String, YokeRequest>> countingRequestsMap = new ConcurrentHashMap<>();
     private final WechatConfig config;
-    private final HttpClient httpClient;
-    private final Logger logger;
+    private final HttpClient http;
+
+    // SDK API
+    private final UserApi userApi;
 
     public WechatVoteHandler(Verticle verticle) {
         config = new LocalConfig();
-        httpClient = verticle.getVertx().createHttpClient()
+        http = verticle.getVertx().createHttpClient()
                 .setPort(443) // XXX ssl only works on 443, not 80 port
                 .setHost("api.weixin.qq.com")
                 .setSSL(true)
                 .setTrustAll(true)
                 .setKeepAlive(true)
                 .setMaxPoolSize(10);
-        logger = verticle.getContainer().logger();
+        userApi = new UserApi(config, http);
     }
 
     @Override
@@ -129,64 +135,73 @@ public class WechatVoteHandler extends Middleware {
             String userMapKey = request.getParameter("openid", request.ip());
             User user = Context.userMap.get(userMapKey);
             if (Objects.isNull(user)) {
-                user = new User();
                 if (Objects.nonNull(paramOpenid)) {
-                    user.openid = paramOpenid;
+                    userApi.fetchUserInfo(paramOpenid, userInfo -> {
+                        if (Objects.nonNull(userInfo)) {
+                            responseIndexPage(request, userInfo);
+                            Context.recordUser(userInfo, null);
+                        } else {
+                            // openid does not exist
+                            responseIndexPageWithIpUser(request);
+                        }
+                    });
+                    return;
                 } else {
-                    user.openid = request.ip();
-                    user.ipBased = true;
+                    // For non-wechat user, only IP address can be used
+                    responseIndexPageWithIpUser(request);
+                    return;
                 }
-                user.nickname = user.openid;
-                try {
-                    Context.recordUser(user, null);
-                    logger.info("New user add to: " + Context.userFilePath);
-                } catch (IOException e) {
-                    logger.error("Failed to write user file!" + e.toString());
-                }
+            } else {
+                responseIndexPage(request, user);
+                return;
             }
-            request.put("user", user);
-            request.put("votedIds", Context.getVotedContentIds(user.openid));
-            request.response().render(INDEX_HTML);
-            return;
         }
 
         final String tokenUrl = MessageFormat.format(TOKEN_URL, config.getAppId(), config.getAppSecret(), code);
-        HttpClientRequest tokenReq = httpClient.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
+        HttpClientRequest tokenReq = http.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
             OAuth2Token auth = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
             if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
                 logger.info("Succeed to get access token by using redirect code.");
 
                 User fetchedUser = Context.userMap.get(auth.openid);
-                if (fetchedUser == null) {
+                if (Objects.isNull(fetchedUser)) {
                     final String userUrl = MessageFormat.format(USRINFO_URL, auth.access_token, auth.openid);
-                    HttpClientRequest userReq = httpClient.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
+                    HttpClientRequest userReq = http.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
                         User user = new Gson().fromJson(userResBody.toString(), User.class);
                         if (Objects.isNull(user.errcode)) {
-                            request.put("user", user);
-                            request.put("votedIds", Context.getVotedContentIds(user.openid));
-                            request.response().render(INDEX_HTML);
+                            responseIndexPage(request, user);
 
-                            try {
-                                Context.recordUser(user, userResBody.toString());
-                                logger.info("New user add to: " + Context.userFilePath);
-                            } catch (IOException e) {
-                                logger.error("Failed to write user file!" + e.toString());
-                            }
+                            Context.recordUser(user, userResBody.toString());
                         } else {
                             logger.error(user.errcode + ": " + user.errmsg);
                         }
                     }));
                     userReq.end();
                 } else {
-                    request.put("user", fetchedUser);
-                    request.put("votedIds", Context.getVotedContentIds(fetchedUser.openid));
-                    request.response().render(INDEX_HTML);
+                    responseIndexPage(request, fetchedUser);
                 }
             } else {
                 logger.error(auth.errcode + ": " + auth.errmsg);
             }
         }));
         tokenReq.end();
+    }
+
+    private void responseIndexPageWithIpUser(YokeRequest request) {
+        User user = new User();
+        user.openid = request.ip();
+        user.ipBased = true;
+        user.nickname = user.openid;
+        responseIndexPage(request, user);
+
+        // XXX is it ok to record IP user?
+        Context.recordUser(user, null);
+    }
+
+    private void responseIndexPage(YokeRequest request, User user) {
+        request.put("user", user);
+        request.put("votedIds", Context.getVotedContentIds(user.openid));
+        request.response().render(INDEX_HTML);
     }
 
     // FIXME Bug: the succeed submit followed by a failure submit

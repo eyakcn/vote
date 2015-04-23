@@ -3,7 +3,7 @@ package io.sophone.sdk.wechat.model;
 /**
  * Created by eyakcn on 2014/10/13.
  */
-public class Identity {
+public final class Identity {
     private String appid;
     private String secret;
     private String originid;

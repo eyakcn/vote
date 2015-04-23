@@ -2,8 +2,10 @@ package io.sophone.vote;
 
 import com.google.gson.Gson;
 import com.jetdrone.vertx.yoke.core.JSON;
-import io.sophone.wechat.User;
+import io.sophone.sdk.wechat.model.User;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.json.impl.Json;
 
@@ -26,6 +28,7 @@ class Context {
     static final String userFilePath = baseDir + "vote_users.txt";
     static final String answerFilePath = baseDir + "vote_history.txt";
     static final String contentFilePath = baseDir + "vote_content.txt";
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
 
     static {
         File baseDirFile = new File(baseDir);
@@ -156,13 +159,18 @@ class Context {
         Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
     }
 
-    static void recordUser(User user, String line) throws IOException {
+    static void recordUser(User user, String line) {
         Context.userMap.put(user.openid, user);
         String userLine = line;
         if (Objects.isNull(userLine)) {
             userLine = new Gson().toJson(user).replace("\r", "").replace("\n", "");
         }
-        Context.recordUserLine(userLine);
+        try {
+            Context.recordUserLine(userLine);
+            logger.info("New user add to: " + Context.userFilePath);
+        } catch (IOException e) {
+            logger.error("Failed to write user file!" + e.toString());
+        }
     }
 
     static List<String> getVotedContentIds(String openid) {

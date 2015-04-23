@@ -4,7 +4,7 @@ package io.sophone.sdk.wechat.model;
  * @author eyakcn
  * @since 4/22/15 AD
  */
-public class ArticleItem {
+public final class ArticleItem {
     private String title;
     private String description;
     private String picurl;

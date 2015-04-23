@@ -4,7 +4,8 @@ import io.sophone.sdk.wechat.message.arch.Message;
 import io.sophone.sdk.wechat.message.arch.ReplyXMLFormat;
 import io.sophone.sdk.wechat.message.impl.*;
 import org.dom4j.DocumentHelper;
-import org.vertx.java.core.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,17 +23,16 @@ import java.util.Arrays;
  * @author eyakcn
  * @since 4/22/15 AD
  */
-public class WechatAPI {
+public class WechatApi {
+    private static final Logger logger = LoggerFactory.getLogger(WechatApi.class);
     private final WechatConfig config;
     private final WechatEventHandler eventHandler;
-    private final Logger logger;
     private final byte[] appIdBytes;
     private final byte[] aesKeyBytes;
 
-    public WechatAPI(WechatConfig config, WechatEventHandler eventHandler, Logger logger) {
+    public WechatApi(WechatConfig config, WechatEventHandler eventHandler) {
         this.config = config;
         this.eventHandler = eventHandler;
-        this.logger = logger;
         this.appIdBytes = config.getAppId().getBytes(Charset.forName("utf-8"));
         if (config.getAESKey() != null) {
             this.aesKeyBytes = DatatypeConverter.parseBase64Binary(config.getAESKey() + "=");

@@ -2,7 +2,7 @@ package io.sophone.vote;
 
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
-import io.sophone.wechat.User;
+import io.sophone.sdk.wechat.model.User;
 import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
