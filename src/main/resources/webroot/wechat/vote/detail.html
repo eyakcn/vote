@@ -19,14 +19,43 @@
       width: 30px;
       height: 30px;
       font-size: 30px;
-      border: 1px solid #4290FB;
+      border: 1px solid #696f7c;
       cursor: pointer;
-      color: #4290FB;
+      color: #696f7c;
       text-align: center;
       vertical-align: middle;
       line-height: 27px;
       border-radius: 3px;
       background-color: white;
+    }
+
+    @-webkit-keyframes fadeInDown {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    details[open] {
+      -webkit-animation-name: fadeInDown;
+      -webkit-animation-duration: 1s;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    section summary:before {
+      content: "\22EF";
+      color: #696f7c;
+      margin-right: 5px;
+    }
+
+    section details[open] > summary:before {
+      content: "\22EE";
+      margin-right: 16px;
     }
 
     details > pre {
@@ -42,6 +71,7 @@
       -webkit-margin-start: 0px;
       -webkit-margin-end: 0px;
       font-weight: bold;
+      outline: none;
     }
 
     section {
@@ -54,6 +84,16 @@
       font-size: 18px;
       font-weight: bold;
       margin: 6px 0px;
+      outline: none;
+    }
+
+    a {
+      color: #696f7c;
+    }
+
+    a:hover {
+      text-decoration: none;
+      color: #4290FB;
     }
 
     section > div {
@@ -65,25 +105,37 @@
       z-index: 10;
     }
 
+    input[type="checkbox"]:before {
+      content: "\2715";
+      color: #696f7c;
+    }
+
     input[type="checkbox"] {
+      text-align: center;
       cursor: pointer;
       -webkit-appearance: none;
       appearance: none;
-      background: #E0E0E0;
+      background: #f5f5f5;
       box-sizing: border-box;
       position: relative;
-      box-sizing: content-box;
-      top: -3px;
-      right: 12px;
+      top: -12px;
+      right: 24px;
       width: 45px;
-      height: 18px;
+      height: 30px;
       border-width: 0;
       transition: all .3s linear;
       border-radius: 2px;
+      font-size: 26px;
+    }
+
+    input[type="checkbox"]:checked:before {
+      content: "\2713";
+      color: #4290FB;
     }
 
     input[type="checkbox"]:checked {
-      background-color: #4290FB;
+      /*background-color: #696f7c;*/
+      box-sizing: content-box;
     }
 
     input[type="checkbox"]:focus {
@@ -92,8 +144,12 @@
     }
 
     #submit {
-      width: 40%;
+      width: 50%;
       font-weight: bold;
+    }
+
+    img {
+      border-radius: 4px;
     }
   </style>
 </head>
