@@ -20,6 +20,7 @@ public final class User extends Status {
     public List<String> privilege; // 用户特权信息，json 数组，如微信沃卡用户为（chinaunicom）
     public long subscribe_time; // 用户关注时间，为时间戳。如果用户曾多次关注，则取最后关注时间
     public String unionid;
+    public String remark;
 
     @Override
     public boolean equals(Object obj) {
