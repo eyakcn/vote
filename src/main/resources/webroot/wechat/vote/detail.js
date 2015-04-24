@@ -5,6 +5,8 @@ $(function () {
   var minSelection = $('#content input[name="minSelection"]').val();
   var maxSelection = $('#content input[name="maxSelection"]').val();
 
+  var canModify = $('#content input[name="canModify"]').val() === 'true';
+
   var getSelectionCount = function () {
     return $('input[type="checkbox"]:checked').length;
   };
@@ -44,6 +46,11 @@ $(function () {
       dataType: "json",
       success: function () {
         $('#submit').prop('disabled', false);
+        if (!canModify) {
+          $('input[type="checkbox"]').prop('disabled', true);
+          $('#submit').remove();
+        }
+
         confirm("已提交，谢谢参与！");
       },
       error: function (e) {

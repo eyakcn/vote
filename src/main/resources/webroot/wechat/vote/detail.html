@@ -65,6 +65,7 @@
       <input name="title" type="hidden" th:value="*{title}"/>
       <input name="minSelection" type="hidden" th:value="*{minSelection}"/>
       <input name="maxSelection" type="hidden" th:value="*{maxSelection}"/>
+      <input name="canModify" type="hidden" th:value="*{canModify}"/>
     </details>
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
