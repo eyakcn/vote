@@ -5,9 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>华政刑司家园</title>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/webroot/wechat/vote/common.css"/>
   <style>
-    .voted {
-      background-color: #DCDCDC;
+    article > details > summary > a,
+    section > details > summary > a {
+      color: #4290FB;
+    }
+
+    section > details > summary.voted > a {
+      color: #696f7c;
     }
   </style>
 </head>
@@ -22,22 +28,31 @@
     <input name="country" type="hidden" th:value="*{country}"/>
     <input name="headimgurl" type="hidden" th:value="*{headimgurl}"/>
   </div>
-  <p th:text="'当前身份认证：' + ${user.nickname}"></p>
 
-  <p th:text="'可参与的投票活动数目：' + ${contents.size()}"></p>
+  <article class="row">
+    <details class="col-xs-12" open="open">
+      <summary>
+        <a>欢迎使用华政微信投票系统</a>
+      </summary>
 
-  <div class="list-group">
-    <th:block th:each="content : ${contents}"
-              th:with="voted=${votedIds.contains(content.id)}">
-      <a th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
-         th:class="'list-group-item' + ${voted ? ' voted' : ''}">
-        <h4 class="list-group-item-heading"
-            th:text="${(voted ? '(您已投)' : '') + content.title}"></h4>
+      <p th:text="'当前身份认证：' + ${user.nickname}"></p>
 
-        <pre th:unless="${voted}" class="list-group-item-text" th:text="${content.text}"></pre>
-      </a>
-    </th:block>
-  </div>
+      <p th:text="'可参与的投票活动数目：' + ${contents.size()}"></p>
+    </details>
+  </article>
+
+  <section class="row" th:each="content : ${contents}"
+           th:with="voted=${votedIds.contains(content.id)}">
+    <input type="checkbox" th:checked="not (${voted} and (not ${content.canModify}))" disabled="true"/>
+    <details open="open" class="col-xs-12">
+      <summary th:class="${voted ? 'voted' : ''}">
+        <a th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"
+           th:text="${(voted ? '(您已投)' : '') + content.title}"/>
+      </summary>
+
+      <pre th:text="${content.text}"></pre>
+    </details>
+  </section>
 </div>
 </body>
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
