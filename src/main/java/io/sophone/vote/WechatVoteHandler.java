@@ -304,6 +304,7 @@ public class WechatVoteHandler extends Middleware {
         String line = answer.encode();
         List<String> lines = new ArrayList<>();
         lines.add(line);
+        // TODO use asynchronous file system api
         File answerFile = new File(Context.answerFilePath);
         try {
             Files.write(answerFile.toPath(), lines, StandardOpenOption.APPEND);

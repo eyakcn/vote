@@ -155,19 +155,19 @@ class Context {
     private static void recordUserLine(String userLine) throws IOException {
         List<String> lines = new ArrayList<>();
         lines.add(userLine);
-        File userFile = new File(Context.userFilePath);
+        File userFile = new File(userFilePath);
         Files.write(userFile.toPath(), lines, StandardOpenOption.APPEND);
     }
 
     static void recordUser(User user, String line) {
-        Context.userMap.put(user.openid, user);
+        userMap.put(user.openid, user);
         String userLine = line;
         if (Objects.isNull(userLine)) {
             userLine = new Gson().toJson(user).replace("\r", "").replace("\n", "");
         }
         try {
-            Context.recordUserLine(userLine);
-            logger.info("New user add to: " + Context.userFilePath);
+            recordUserLine(userLine);
+            logger.info("New user add to: " + userFilePath);
         } catch (IOException e) {
             logger.error("Failed to write user file!" + e.toString());
         }

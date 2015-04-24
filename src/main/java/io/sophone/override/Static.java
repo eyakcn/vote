@@ -156,6 +156,7 @@ public class Static extends Middleware {
         // write content type
         String contentType = MimeType.getMime(file);
         String charset = MimeType.getCharset(contentType);
+        // FIXME setContentType put header "content-type"
         request.response().setContentType(contentType, charset);
         request.response().putHeader("Content-Type", contentType);
         request.response().putHeader("Content-Length", Long.toString(props.size()));
