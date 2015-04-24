@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by eyakcn on 2014/10/15.
  */
-public class VoteCounting {
+public final class VoteCounting {
     private final String id;
     private final Map<String, List<String>> voterChoicesMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, User>> choiceVotersMap = new ConcurrentHashMap<>();

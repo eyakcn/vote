@@ -4,6 +4,7 @@ import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.sdk.wechat.WechatApi;
+import io.sophone.vote.VoteEventHandler;
 import io.sophone.wechat.LocalConfig;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
@@ -32,7 +33,7 @@ public class WeixinHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(20);
         logger = verticle.getContainer().logger();
-        wechatApi = new WechatApi(new LocalConfig(), new LocalEventHandler());
+        wechatApi = new WechatApi(new LocalConfig(), new VoteEventHandler());
     }
 
     @Override
@@ -45,6 +46,7 @@ public class WeixinHandler extends Middleware {
         String nonce = request.getParameter("nonce");
 
         try {
+            wechatApi.setRequest(request);
             switch (request.method()) {
                 case "GET":
                     // validation request from wechat server

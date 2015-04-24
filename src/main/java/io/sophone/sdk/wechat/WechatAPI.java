@@ -6,6 +6,7 @@ import io.sophone.sdk.wechat.message.impl.*;
 import org.dom4j.DocumentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.http.HttpServerRequest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -39,6 +40,10 @@ public class WechatApi {
         } else {
             this.aesKeyBytes = null;
         }
+    }
+
+    public void setRequest(HttpServerRequest request) {
+        this.eventHandler.setRequest(request);
     }
 
     public boolean isEncrypted() {

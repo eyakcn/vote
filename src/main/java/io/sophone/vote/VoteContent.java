@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by eyakcn on 2014/10/13.
  */
-public class VoteContent {
+public final class VoteContent {
     public String id;
     public String title = "(Empty Title)";
     public String image;

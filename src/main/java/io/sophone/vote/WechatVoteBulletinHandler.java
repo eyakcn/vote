@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * Created by yuanyuan on 10/26/14 AD.
  */
-public class WechatVoteBulletinHandler extends Middleware {
+public final class WechatVoteBulletinHandler extends Middleware {
     @Override
     public void handle(@NotNull YokeRequest request, @NotNull Handler<Object> next) {
         if (!Objects.equals(request.method(), "GET")) {

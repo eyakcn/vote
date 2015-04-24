@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by eyakcn on 2014/10/13.
  */
-public class WechatVoteHandler extends Middleware {
+public final class WechatVoteHandler extends Middleware {
     private static final Logger logger = LoggerFactory.getLogger(WechatVoteHandler.class);
 
     private static final String INDEX_HTML = "wechat/vote/index.html";

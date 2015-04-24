@@ -23,7 +23,7 @@ summary::-webkit-details-marker {
 section summary:before {
   content: "\22EF";
   color: #696f7c;
-  margin-left: 65px;
+  margin-left: 60px;
   margin-right: 5px;
 }
 

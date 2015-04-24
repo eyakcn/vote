@@ -11,6 +11,7 @@ import org.vertx.java.core.json.impl.Json;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -20,7 +21,9 @@ import java.util.stream.Collectors;
 /**
  * Created by yuanyuan on 10/18/14 AD.
  */
-class Context {
+final class Context {
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
+
     static final Map<String, User> userMap = new ConcurrentHashMap<>();
     static final Map<String, VoteCounting> voteCountingMap = new ConcurrentHashMap<>();
     static final Map<String, VoteContent> voteContentMap = new ConcurrentHashMap<>();
@@ -28,7 +31,7 @@ class Context {
     static final String userFilePath = baseDir + "vote_users.txt";
     static final String answerFilePath = baseDir + "vote_history.txt";
     static final String contentFilePath = baseDir + "vote_content.txt";
-    private static final Logger logger = LoggerFactory.getLogger(Context.class);
+    static VoteTheme voteTheme;
 
     static {
         File baseDirFile = new File(baseDir);
@@ -43,11 +46,11 @@ class Context {
         File contentFile = new File(contentFilePath);
         try {
             if (contentFile.exists()) {
-                List<String> lines = Files.readAllLines(contentFile.toPath());
-                // FIXME it's a bad idea to write each vote content in single line
-                lines.forEach(line -> {
-                    analyzeVoteContent(line); // need userMap prepared
-                });
+                byte[] bytes = Files.readAllBytes(contentFile.toPath());
+                voteTheme = Json.decodeValue(new String(bytes, StandardCharsets.UTF_8), VoteTheme.class);
+                if (Objects.nonNull(voteTheme.votes)) {
+                    voteTheme.votes.forEach(content -> voteContentMap.put(content.id, content));
+                }
             } else {
                 contentFile.createNewFile();
             }
@@ -116,11 +119,6 @@ class Context {
         counting.addVoterToChoices(selections, user);
         counting.recordVoterChoices(openid, selections);
         counting.recordVoter(user);
-    }
-
-    private static void analyzeVoteContent(String line) {
-        VoteContent content = Json.decodeValue(line, VoteContent.class);
-        voteContentMap.put(content.id, content);
     }
 
     static VoteContent getVoteContent(String contentId) {

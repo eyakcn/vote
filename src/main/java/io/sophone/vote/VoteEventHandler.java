@@ -1,24 +1,26 @@
-package io.sophone.weixin;
+package io.sophone.vote;
 
-import io.sophone.sdk.wechat.WechatApi;
 import io.sophone.sdk.wechat.WechatEventHandler;
 import io.sophone.sdk.wechat.message.arch.ReplyXMLFormat;
 import io.sophone.sdk.wechat.message.impl.IncomingClickEventMessage;
 import io.sophone.sdk.wechat.message.impl.IncomingTextMessage;
 import io.sophone.sdk.wechat.message.impl.OutgoingNewsMessage;
 import io.sophone.sdk.wechat.model.ArticleItem;
+import org.vertx.java.core.http.HttpServerRequest;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author eyakcn
  * @since 4/23/15 AD
  */
-public class LocalEventHandler implements WechatEventHandler {
-    private WechatApi sdk;
+public class VoteEventHandler implements WechatEventHandler {
+    private HttpServerRequest request;
 
-    public void setWeChatMP(WechatApi mpSDK) {
-        sdk = mpSDK;
+    @Override
+    public void setRequest(HttpServerRequest request) {
+        this.request = request;
     }
 
     public ReplyXMLFormat handle(IncomingTextMessage incoming) {
@@ -48,10 +50,14 @@ public class LocalEventHandler implements WechatEventHandler {
 
     private OutgoingNewsMessage wrapVoteNews(OutgoingNewsMessage news) {
         ArticleItem voteArticle = new ArticleItem();
-        voteArticle.setTitle("投票系统");
-        voteArticle.setDescription("本系统不定期发布相关投票活动，点击图片开始。");
-        voteArticle.setPicurl("http://www.comearly.com/webroot/vote.png");
-        voteArticle.setUrl("http://www.comearly.com/wechat/vote?openid=" + news.getToUserName());
+        String domain = "www.comearly.com";
+        if (Objects.nonNull(request)) {
+            // TODO get domain name
+        }
+        voteArticle.setTitle("火热投票进行中！");
+        voteArticle.setDescription(Context.voteTheme.theme);
+        voteArticle.setPicurl("http://" + domain + "/sysroot/wechat/vote/image/" + Context.voteTheme.image);
+        voteArticle.setUrl("http://" + domain + "/wechat/vote?openid=" + news.getToUserName());
         news.setArticles(Arrays.asList(voteArticle));
         news.setCreateTime((int) (System.currentTimeMillis() / 1000));
         return news;
