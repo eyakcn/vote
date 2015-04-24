@@ -1,13 +1,12 @@
 package io.sophone.vote;
 
-import com.google.gson.Gson;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.sdk.wechat.WechatConfig;
-import io.sophone.sdk.wechat.model.OAuth2Token;
 import io.sophone.sdk.wechat.model.User;
 import io.sophone.sdk.wechat.service.communicate.UserApi;
+import io.sophone.sdk.wechat.service.webpage.OAuth2Api;
 import io.sophone.wechat.LocalConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
-import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
@@ -24,7 +22,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -41,9 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WechatVoteHandler extends Middleware {
     private static final Logger logger = LoggerFactory.getLogger(WechatVoteHandler.class);
 
-    private static final String TOKEN_URL = "/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
-    private static final String USRINFO_URL = "/sns/userinfo?access_token={0}&openid={1}&lang=zh_CN";
-
     private static final String INDEX_HTML = "wechat/vote/index.html";
     private static final String DETAIL_HTML = "wechat/vote/detail.html";
 
@@ -53,6 +47,7 @@ public class WechatVoteHandler extends Middleware {
 
     // SDK API
     private final UserApi userApi;
+    private final OAuth2Api oAuth2Api;
 
     public WechatVoteHandler(Verticle verticle) {
         config = new LocalConfig();
@@ -64,6 +59,7 @@ public class WechatVoteHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(10);
         userApi = new UserApi(config, http);
+        oAuth2Api = new OAuth2Api(config, http);
     }
 
     @Override
@@ -135,10 +131,10 @@ public class WechatVoteHandler extends Middleware {
             User user = Context.userMap.get(userMapKey);
             if (Objects.isNull(user)) {
                 if (Objects.nonNull(paramOpenid)) {
-                    userApi.fetchUserInfo(paramOpenid, userInfo -> {
+                    userApi.fetchUserInfo(paramOpenid, (userInfo, userLine) -> {
                         if (Objects.nonNull(userInfo)) {
                             responseIndexPage(request, userInfo);
-                            Context.recordUser(userInfo, null);
+                            Context.recordUser(userInfo, userLine);
                         } else {
                             // openid does not exist
                             responseIndexPageWithIpUser(request);
@@ -154,38 +150,20 @@ public class WechatVoteHandler extends Middleware {
                 responseIndexPage(request, user);
                 return;
             }
-        }
-
-        final String tokenUrl = MessageFormat.format(TOKEN_URL, config.getAppId(), config.getAppSecret(), code);
-        HttpClientRequest tokenReq = http.get(tokenUrl, tokenRes -> tokenRes.bodyHandler(tokenResBody -> {
-            OAuth2Token auth = new Gson().fromJson(tokenResBody.toString(), OAuth2Token.class);
-            if (Objects.isNull(auth.errcode) && StringUtils.isNotBlank(auth.openid)) {
-                logger.info("Succeed to get access token by using redirect code.");
-
-                User fetchedUser = Context.userMap.get(auth.openid);
-                if (Objects.isNull(fetchedUser)) {
-                    final String userUrl = MessageFormat.format(USRINFO_URL, auth.access_token, auth.openid);
-                    HttpClientRequest userReq = http.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
-                        User user = new Gson().fromJson(userResBody.toString(), User.class);
-                        if (Objects.isNull(user.errcode)) {
-                            responseIndexPage(request, user);
-
-                            Context.recordUser(user, userResBody.toString());
-                        } else {
-                            logger.error(user.errcode + ": " + user.errmsg);
-                        }
-                    }));
-                    userReq.exceptionHandler(t -> logger.error("Request of fetch OAuth2 user failed.", t));
-                    userReq.end();
+        } else {
+            // Fetch user info by OAuth2.0
+            oAuth2Api.getAccessToken(code, auth -> {
+                User cachedUser = Context.userMap.get(auth.openid);
+                if (Objects.nonNull(cachedUser)) {
+                    responseIndexPage(request, cachedUser);
                 } else {
-                    responseIndexPage(request, fetchedUser);
+                    oAuth2Api.fetchUserInfo(auth, (user, line) -> {
+                        responseIndexPage(request, user);
+                        Context.recordUser(user, line);
+                    });
                 }
-            } else {
-                logger.error(auth.errcode + ": " + auth.errmsg);
-            }
-        }));
-        tokenReq.exceptionHandler(t -> logger.error("Request of fetch OAuth2 token failed.", t));
-        tokenReq.end();
+            });
+        }
     }
 
     private void responseIndexPageWithIpUser(YokeRequest request) {
@@ -284,11 +262,11 @@ public class WechatVoteHandler extends Middleware {
         // Warning message
         String message = null;
         if (!legalVoter) {
-            message = "警告：只有微信用户可参与投票!";
+            message = "只有微信用户可参与投票!";
         } else if (!legalTime) {
-            message = "警告：投票时间 " + content.startDate + " ~ " + content.endDate;
+            message = "投票时间 " + content.startDate + " ~ " + content.endDate;
         } else if (!legalChance) {
-            message = "警告：您只有一次投票机会，上次提交" + StringUtils.join(choices);
+            message = "您的投票为" + StringUtils.join(choices);
         }
         if (Objects.nonNull(message)) {
             request.put("warning", message);

@@ -9,7 +9,7 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 
 import java.text.MessageFormat;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * @author eyakcn
@@ -29,16 +29,17 @@ public final class UserApi {
         this.basicApi = new BasicApi(config, http);
     }
 
-    public void fetchUserInfo(String openid, Consumer<User> userConsumer) {
+    public void fetchUserInfo(String openid, BiConsumer<User, String> userConsumer) {
         basicApi.getAccessToken(token -> {
             final String userUrl = MessageFormat.format(USRINFO_URL, token.access_token, openid);
             logger.info("Fetch user info: " + userUrl);
             HttpClientRequest userReq = http.get(userUrl, userRes -> userRes.bodyHandler(userResBody -> {
-                User user = new Gson().fromJson(userResBody.toString(), User.class);
+                String line = userResBody.toString();
+                User user = new Gson().fromJson(line, User.class);
                 if (user.isSuccess()) {
-                    userConsumer.accept(user);
+                    userConsumer.accept(user, line);
                 } else if (user.illegalOpenid()) {
-                    userConsumer.accept(null);
+                    userConsumer.accept(null, null);
                 } else {
                     logger.error(user.errcode + ": " + user.errmsg);
                 }
