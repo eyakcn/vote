@@ -44,8 +44,10 @@
   </article>
 
   <section class="row" th:each="content : ${contents}"
-           th:with="voted=${votedIds.contains(content.id)}">
-    <input type="checkbox" th:checked="not (${voted} and (not ${content.canModify}))" disabled="true"/>
+           th:with="voted=${votedIds.contains(content.id)},legalUser=${not (content.onlyWechat and user.ipBased)}">
+    <input type="checkbox"
+           th:checked="${legalUser and ((not voted) or content.canModify)}"
+           disabled="true"/>
     <details open="open" class="col-xs-12">
       <summary th:class="${voted ? 'voted' : ''}">
         <a th:href="${'/wechat/vote?content-id=' + content.id + (user.openid != null ? ('&amp;openid=' + user.openid) : '')}"

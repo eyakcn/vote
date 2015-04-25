@@ -60,7 +60,7 @@ public class WechatApi {
      * @param nonce
      * @return
      */
-    public String validate(final String signature, final String echostr, int timestamp, final String nonce) {
+    public String validate(final String signature, final String echostr, String timestamp, final String nonce) {
         return verify(signature, timestamp, nonce) ? echostr : "";
     }
 
@@ -79,7 +79,7 @@ public class WechatApi {
      *                         Application should response error if wants WeChat platform
      *                         retry, or response empty page to ignore.
      */
-    public String incomingMessage(final String signature, final int timestamp, final String nonce,
+    public String incomingMessage(final String signature, final String timestamp, final String nonce,
                                   final String encryptType, final String msgSignature, final String body) {
         if (!verify(signature, timestamp, nonce)) {
             logger.warn("Failed while verify signature of request query");
@@ -118,7 +118,7 @@ public class WechatApi {
                 logger.warn("Failed to encrypt message");
                 return null;
             }
-            return packAndSignEncryptedEnvelope(enc, WechatUtils.now(), WechatUtils.nonce());
+            return packAndSignEncryptedEnvelope(enc, String.valueOf(WechatUtils.now()), WechatUtils.nonce());
         } else {
             return rpl.toReplyXMLString();
         }
@@ -144,7 +144,7 @@ public class WechatApi {
         }
     }
 
-    private String packAndSignEncryptedEnvelope(String enc, int createTime, String nonce) {
+    private String packAndSignEncryptedEnvelope(String enc, String createTime, String nonce) {
         org.dom4j.Element root = DocumentHelper.createElement("xml");
         root.addElement("Encrypt").addCDATA(enc);
         root.addElement("MsgSignature").addCDATA(sign(createTime, nonce, enc));
@@ -153,7 +153,7 @@ public class WechatApi {
         return root.asXML();
     }
 
-    private String verifyAndExtractEncryptedEnvelope(final int timestamp, final String nonce,
+    private String verifyAndExtractEncryptedEnvelope(final String timestamp, final String nonce,
                                                      final String msgSignature, final String body) {
         String encMessage = null;
         String toUserName = null;
@@ -186,18 +186,18 @@ public class WechatApi {
         return encMessage;
     }
 
-    private boolean verify(final String signature, int timestamp, final String nonce) {
-        String[] verify = new String[]{config.getToken(), String.valueOf(timestamp), nonce};
+    private boolean verify(final String signature, String timestamp, final String nonce) {
+        String[] verify = new String[]{config.getToken(), timestamp, nonce};
         Arrays.sort(verify);
         return signature.equals(WechatUtils.sha1hex(verify[0] + verify[1] + verify[2]));
     }
 
-    private boolean verify(String signature, int timestamp, String nonce, String msg) {
+    private boolean verify(String signature, String timestamp, String nonce, String msg) {
         return signature.equals(sign(timestamp, nonce, msg));
     }
 
-    private String sign(int timestamp, String nonce, String msg) {
-        String[] verify = new String[]{config.getToken(), String.valueOf(timestamp), nonce, msg};
+    private String sign(String timestamp, String nonce, String msg) {
+        String[] verify = new String[]{config.getToken(), timestamp, nonce, msg};
         Arrays.sort(verify);
         return WechatUtils.sha1hex(verify[0] + verify[1] + verify[2] + verify[3]);
     }

@@ -67,53 +67,46 @@ public final class WechatVoteHandler extends Middleware {
         logger.info(request.ip() + " " + request.method() + " " + request.uri());
         switch (request.method()) {
             case "GET":
-                String accept = request.getHeader("accept");
-                String contentId = request.getParameter("content-id");
+                final String accept = request.getHeader("accept");
+                final String contentId = request.getParameter("content-id");
                 if (Objects.equals("text/event-stream", accept)) {
                     // Counting request
-                    request.exceptionHandler(event -> logger.error("Counting Request Exception", event));
-                    request.response().exceptionHandler(event -> logger.error("Counting Response Exception", event));
-                    String openid = request.getParameter("openid", request.ip());
+                    final String userKey = request.getParameter("openid", request.ip());
+
+                    request.exceptionHandler(event -> logger.error("Counting Request Exception. IP: " + request.ip(), event));
+                    request.response().exceptionHandler(event -> {
+                        logger.error("Counting Response Exception. IP" + request.ip(), event);
+                        logger.info("Try to remove closed counting request.");
+
+                        countingRequestsMap.get(contentId).remove(userKey);
+                    });
+
                     if (Objects.nonNull(contentId)) {
                         Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
                         if (Objects.isNull(countingRequests)) {
                             countingRequests = new ConcurrentHashMap<>();
                             countingRequestsMap.put(contentId, countingRequests);
                         }
-                        countingRequests.put(openid, request);
-                        logger.info("New counting reqeust for " + contentId + " from " + openid);
+                        countingRequests.put(userKey, request);
+                        logger.info("New counting reqeust for " + contentId + " from " + userKey);
                     }
                 } else if (Objects.isNull(contentId)) {
                     // index.html
-                    request.exceptionHandler(event -> logger.error("Index Page Request Exception", event));
-                    request.response().exceptionHandler(event -> logger.error("Index Page Response Exception", event));
+                    request.exceptionHandler(event -> logger.error("Index Page Request Exception. IP" + request.ip(), event));
+                    request.response().exceptionHandler(event -> logger.error("Index Page Response Exception. IP" + request.ip(), event));
                     handleGetIndex(request, next);
                 } else {
                     // detail.html
-                    request.exceptionHandler(event -> logger.error("Detail Page Request Exception", event));
-                    request.response().exceptionHandler(event -> logger.error("Detail Page Response Exception", event));
+                    request.exceptionHandler(event -> logger.error("Detail Page Request Exception. IP" + request.ip(), event));
+                    request.response().exceptionHandler(event -> logger.error("Detail Page Response Exception. IP" + request.ip(), event));
                     handleGetContent(request, next);
                 }
                 break;
-            case "PUT":
-                break;
             case "POST":
                 // submit voting request
-                request.exceptionHandler(event -> logger.error("Vote Request Exception", event));
-                request.response().exceptionHandler(event -> logger.error("Vote Response Exception", event));
+                request.exceptionHandler(event -> logger.error("Vote Request Exception. IP" + request.ip(), event));
+                request.response().exceptionHandler(event -> logger.error("Vote Response Exception. IP" + request.ip(), event));
                 handlePost(request, next);
-                break;
-            case "DELETE":
-                break;
-            case "OPTIONS":
-                break;
-            case "HEAD":
-                break;
-            case "TRACE":
-                break;
-            case "PATCH":
-                break;
-            case "CONNECT":
                 break;
         }
     }
@@ -213,14 +206,8 @@ public final class WechatVoteHandler extends Middleware {
         response.putHeader("Cache-Control", "no-cache");
         response.putHeader("Connection", "keep-alive");
 
-        // TODO remove counting request from map when the connection is not alive
-        try {
-            response.write(line);
-            response.end(); // XXX must end SSE message response
-        } catch (Throwable t) {
-            // May catch nothing, should set exception handler for response object
-            logger.error("Counting Response Exception", t);
-        }
+        response.write(line);
+        response.end(); // XXX must end SSE message response
     }
 
     private void handleGetContent(YokeRequest request, Handler<Object> next) {

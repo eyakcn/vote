@@ -6,6 +6,7 @@ import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.sdk.wechat.WechatApi;
 import io.sophone.vote.VoteEventHandler;
 import io.sophone.wechat.LocalConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
@@ -51,8 +52,13 @@ public class WeixinHandler extends Middleware {
                 case "GET":
                     // validation request from wechat server
                     String echostr = request.getParameter("echostr", "");
+                    if (StringUtils.isAnyBlank(signature, timestamp, nonce, echostr)) {
+                        response.setStatusCode(400);
+                        response.end();
+                        return;
+                    }
                     logger.info("Request Echo String: " + echostr);
-                    String validstr = wechatApi.validate(signature, echostr, Integer.valueOf(timestamp), nonce);
+                    String validstr = wechatApi.validate(signature, echostr, timestamp, nonce);
                     logger.info("Response Valid String: " + validstr);
 
                     response.setStatusCode(200);
@@ -68,7 +74,7 @@ public class WeixinHandler extends Middleware {
 
                     String body = request.<Buffer>body().toString();
                     logger.info("Request " + request.ip() + "\n" + body);
-                    String reply = wechatApi.incomingMessage(signature, Integer.valueOf(timestamp), nonce, encryptType, msgSignature, body);
+                    String reply = wechatApi.incomingMessage(signature, timestamp, nonce, encryptType, msgSignature, body);
                     if (Objects.nonNull(reply)) {
                         response.setStatusCode(200);
                         response.putHeader("Content-Type", "application/xml;charset=utf-8");
