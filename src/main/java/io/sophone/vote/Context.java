@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
  * Created by yuanyuan on 10/18/14 AD.
  */
 final class Context {
-    private static final Logger logger = LoggerFactory.getLogger(Context.class);
-
     static final Map<String, User> userMap = new ConcurrentHashMap<>();
     static final Map<String, VoteCounting> voteCountingMap = new ConcurrentHashMap<>();
     static final Map<String, VoteContent> voteContentMap = new ConcurrentHashMap<>();
@@ -31,6 +29,7 @@ final class Context {
     static final String userFilePath = baseDir + "vote_users.txt";
     static final String answerFilePath = baseDir + "vote_history.txt";
     static final String contentFilePath = baseDir + "vote_content.txt";
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
     static VoteTheme voteTheme;
 
     static {

@@ -73,12 +73,11 @@ public final class WechatVoteHandler extends Middleware {
                     // Counting request
                     final String userKey = request.getParameter("openid", request.ip());
 
-                    request.exceptionHandler(event -> logger.error("Counting Request Exception. IP: " + request.ip(), event));
+                    request.exceptionHandler(event -> logger.error("Counting Request Exception. IP = " + request.ip(), event));
                     request.response().exceptionHandler(event -> {
-                        logger.error("Counting Response Exception. IP" + request.ip(), event);
-                        logger.info("Try to remove closed counting request.");
-
+                        logger.error("Counting Response Exception. IP = " + request.ip(), event);
                         countingRequestsMap.get(contentId).remove(userKey);
+                        logger.info("Counting request removed in exception handler. contentId = " + contentId + ", openid = " + userKey);
                     });
 
                     if (Objects.nonNull(contentId)) {
@@ -88,24 +87,24 @@ public final class WechatVoteHandler extends Middleware {
                             countingRequestsMap.put(contentId, countingRequests);
                         }
                         countingRequests.put(userKey, request);
-                        logger.info("New counting reqeust for " + contentId + " from " + userKey);
+                        logger.info("New counting request for " + contentId + " from " + userKey);
                     }
                 } else if (Objects.isNull(contentId)) {
                     // index.html
-                    request.exceptionHandler(event -> logger.error("Index Page Request Exception. IP" + request.ip(), event));
-                    request.response().exceptionHandler(event -> logger.error("Index Page Response Exception. IP" + request.ip(), event));
+                    request.exceptionHandler(event -> logger.error("Index Page Request Exception. IP = " + request.ip(), event));
+                    request.response().exceptionHandler(event -> logger.error("Index Page Response Exception. IP = " + request.ip(), event));
                     handleGetIndex(request, next);
                 } else {
                     // detail.html
-                    request.exceptionHandler(event -> logger.error("Detail Page Request Exception. IP" + request.ip(), event));
-                    request.response().exceptionHandler(event -> logger.error("Detail Page Response Exception. IP" + request.ip(), event));
+                    request.exceptionHandler(event -> logger.error("Detail Page Request Exception. IP = " + request.ip(), event));
+                    request.response().exceptionHandler(event -> logger.error("Detail Page Response Exception. IP = " + request.ip(), event));
                     handleGetContent(request, next);
                 }
                 break;
             case "POST":
                 // submit voting request
-                request.exceptionHandler(event -> logger.error("Vote Request Exception. IP" + request.ip(), event));
-                request.response().exceptionHandler(event -> logger.error("Vote Response Exception. IP" + request.ip(), event));
+                request.exceptionHandler(event -> logger.error("Vote Request Exception. IP = " + request.ip(), event));
+                request.response().exceptionHandler(event -> logger.error("Vote Response Exception. IP = " + request.ip(), event));
                 handlePost(request, next);
                 break;
         }
@@ -117,7 +116,6 @@ public final class WechatVoteHandler extends Middleware {
         request.put("contents", contents);
 
         String code = request.getParameter("code");
-        logger.info("Handle request with code = " + code);
         // 服务号才能拿到授权访问用户信息，订阅号则不能，code用来换取Wechat服务器AccessToken，以进一步获取用户信息
         if (Objects.isNull(code)) {
             String paramOpenid = request.getParameter("openid");
@@ -186,12 +184,19 @@ public final class WechatVoteHandler extends Middleware {
             countingResult.putNumber(candidate.caption, candidate.count);
         }
 
-        String responseText = "data: " + countingResult.encode() + "\n\n";
-        for (Map.Entry<String, YokeRequest> entry : countingRequestsMap.get(contentId).entrySet()) {
-            String openid = entry.getKey();
+        final String responseText = "data: " + countingResult.encode() + "\n\n";
+        Map<String, YokeRequest> countingRequests = countingRequestsMap.get(contentId);
+        for (Map.Entry<String, YokeRequest> entry : countingRequests.entrySet()) {
+            final String userKey = entry.getKey();
             YokeRequest countingRequest = entry.getValue();
-            writeSseMessage(countingRequest.response(), responseText);
-            logger.info("Response counting request for " + contentId + " to " + openid);
+            try {
+                writeSseMessage(countingRequest.response(), responseText);
+                logger.info("Response counting request for " + contentId + " to " + userKey);
+            } catch (Throwable t) {
+                logger.error("Failed to response counting request for " + contentId + " to " + userKey, t);
+                countingRequests.remove(userKey);
+                logger.info("Counting request removed before sent. contentId = " + contentId + ", openid = " + userKey);
+            }
         }
     }
 
