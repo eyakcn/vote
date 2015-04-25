@@ -32,12 +32,14 @@
   <article class="row">
     <details class="col-xs-12" open="open">
       <summary>
-        <a>欢迎使用华政微信投票系统</a>
+        <a th:text="${theme}"></a>
       </summary>
 
       <p th:text="'当前身份认证：' + ${user.nickname}"></p>
 
       <p th:text="'当前投票活动数目：' + ${contents.size()}"></p>
+
+      <p style="color: red;">请点击以下活动标题进入投票页面。</p>
     </details>
   </article>
 

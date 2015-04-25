@@ -1,5 +1,9 @@
 @charset "UTF-8";
 
+a:hover {
+  text-decoration: none;
+}
+
 /* <details> open with animation */
 @-webkit-keyframes fadeInDown {
   0% {

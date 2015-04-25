@@ -119,6 +119,7 @@ public final class WechatVoteHandler extends Middleware {
     }
 
     private void handleGetIndex(YokeRequest request, Handler<Object> next) {
+        request.put("theme", Context.voteTheme.theme);
         List<VoteContent> contents = Context.getVoteContentList();
         request.put("contents", contents);
 
@@ -229,19 +230,21 @@ public final class WechatVoteHandler extends Middleware {
         VoteContent content = Context.getVoteContent(contentId);
         request.put("content", content);
 
-        String openid = request.getParameter("openid", request.ip());
-        User fetchedUser = Context.userMap.get(openid);
+        String paramOpenid = request.getParameter("openid");
+        request.put("openid", paramOpenid);
+
+        String userKey = request.getParameter("openid", request.ip());
+        User fetchedUser = Context.userMap.get(userKey);
         if (Objects.isNull(fetchedUser)) {
             // XXX user skipped index page, and access detail page directly
             String url = "/wechat/vote";
-            String paramOpenid = request.getParameter("openid");
             if (Objects.nonNull(paramOpenid)) {
                 url += "?openid=" + paramOpenid;
             }
             request.response().redirect(url);
             return;
         }
-        List<String> choices = Context.getVoteChoices(contentId, openid);
+        List<String> choices = Context.getVoteChoices(contentId, userKey);
         request.put("choices", choices);
 
         boolean legalVoter = !(content.onlyWechat && fetchedUser.ipBased);

@@ -69,7 +69,7 @@
     </details>
   </article>
   <section th:each="candidate : ${content.candidates}" class="row">
-    <input type="checkbox" th:if="${canVote}" th:checked="${choices.contains(candidate.caption)}"/>
+    <input type="checkbox" th:disabled="${!canVote}" th:checked="${choices.contains(candidate.caption)}"/>
     <input type="hidden" th:value="${candidate.caption}"/>
 
     <details open="open" th:object="${candidate}" class="col-xs-12">
@@ -87,10 +87,15 @@
       <img th:if="*{image}" th:src="*{'/sysroot/wechat/vote/image/' + image}" style="max-width: 100%;"/>
     </details>
   </section>
-  <div class="row" th:if="${canVote}">
-    <div class="col-xs-12" style="text-align: center; padding: 30px;">
+  <div class="row">
+    <div th:if="${canVote}" class="col-xs-12" style="text-align: center; padding: 30px;">
       <button id="submit" type="button" class="btn btn-primary"
               th:text="${content.canModify ? '提交(可修改)' : '提交(不可修改)'}"></button>
+    </div>
+    <div class="col-xs-12" style="text-align: center; padding: 30px;">
+      <div class="btn btn-primary">
+        <a id="back-btn" style="color: white;" th:href="'/wechat/vote?openid=' + ${openid}">返回活动列表</a>
+      </div>
     </div>
   </div>
 </div>
