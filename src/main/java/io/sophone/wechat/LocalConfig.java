@@ -2,6 +2,7 @@ package io.sophone.wechat;
 
 import io.sophone.sdk.wechat.WechatConfig;
 import io.sophone.sdk.wechat.model.Identity;
+import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.json.impl.Json;
 
 import java.io.File;
@@ -14,6 +15,8 @@ import java.nio.file.Files;
 public class LocalConfig implements WechatConfig {
     private static final Identity wechatId;
     private static final String baseDir = System.getProperty("user.home") + "/wechat/";
+    private static WechatConfig globalConfig;
+    private static HttpClient globalHttp;
 
     static {
         wechatId = loadIdentity();
@@ -33,6 +36,22 @@ public class LocalConfig implements WechatConfig {
         }
 
         return Json.decodeValue(idContent, Identity.class);
+    }
+
+    public static WechatConfig getGlobalConfig() {
+        return globalConfig;
+    }
+
+    public static void setGlobalConfig(WechatConfig globalConfig) {
+        LocalConfig.globalConfig = globalConfig;
+    }
+
+    public static HttpClient getGlobalHttp() {
+        return globalHttp;
+    }
+
+    public static void setGlobalHttp(HttpClient globalHttp) {
+        LocalConfig.globalHttp = globalHttp;
     }
 
     @Override

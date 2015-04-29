@@ -5,6 +5,7 @@ import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
 import io.sophone.mass.ClassifyNewsHandler;
 import io.sophone.sdk.wechat.WechatApi;
+import io.sophone.sdk.wechat.WechatConfig;
 import io.sophone.vote.VoteEventHandler;
 import io.sophone.wechat.LocalConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +36,11 @@ public class WeixinHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(20);
         logger = verticle.getContainer().logger();
-        wechatApi = new WechatApi(new LocalConfig());
+        WechatConfig localConfig = new LocalConfig();
+        LocalConfig.setGlobalConfig(localConfig);
+        LocalConfig.setGlobalHttp(http);
+
+        wechatApi = new WechatApi(localConfig);
         wechatApi.addHandler(new VoteEventHandler());
         wechatApi.addHandler(new ClassifyNewsHandler());
     }
