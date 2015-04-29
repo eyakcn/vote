@@ -38,32 +38,32 @@ public class ClassifyNewsHandler implements WechatEventHandler {
     private static final MaterialApi materialApi = new MaterialApi(LocalConfig.getGlobalConfig(), LocalConfig.getGlobalHttp());
     private static final List<TopicFilter> topicFilters = new ArrayList<>();
 
+    private static final int MAX_ARTICLE_COUNT = 10;
+
     static {
         loadTopicFilters();
         loadTopicArticles();
     }
 
     private static void loadTopicArticles() {
-        materialApi.batchGetAll("news", ClassifyNewsHandler::filterTopicArticles);
+        for (TopicFilter filter : topicFilters) {
+            topicArticles.put(filter.getEventKey(), new ArrayList<>());
+        }
+        materialApi.batchGetAll("news", ClassifyNewsHandler::appendTopicArticles);
     }
 
-    private static void filterTopicArticles(List<MaterialItem> materialItems) {
+    private static boolean appendTopicArticles(List<MaterialItem> materialItems) {
         for (MaterialItem materialItem : materialItems) {
             List<NewsItem> items = materialItem.content.news_item;
-            for (NewsItem item : items) {
-                for (TopicFilter filter : topicFilters) {
-                    if (item.title.contains(filter.getTopic())) {
-                        if (!topicArticles.containsKey(filter.getEventKey())) {
-                            List<ArticleItem> articles = new ArrayList<>();
-                            topicArticles.put(filter.getEventKey(), articles);
-                        }
-                        List<ArticleItem> articles = topicArticles.get(filter.getEventKey());
+            for (TopicFilter filter : topicFilters) {
+                List<ArticleItem> articles = topicArticles.get(filter.getEventKey());
+                if (articles.size() == MAX_ARTICLE_COUNT) {
+                    break;
+                }
 
-                        ArticleItem article = new ArticleItem();
-                        article.setTitle(item.title);
-                        article.setDescription(item.content);
-                        article.setUrl(item.url);
-                        // XXX how about content_source_url
+                for (NewsItem item : items) {
+                    if (item.title.startsWith("【" + filter.getTopic() + "】")) {
+                        ArticleItem article = convert(item);
                         articles.add(article);
                         logger.info("Pre-cached article: {}", article.getTitle());
                         break;
@@ -71,6 +71,14 @@ public class ClassifyNewsHandler implements WechatEventHandler {
                 }
             }
         }
+        boolean needContinue = false;
+        for (TopicFilter filter : topicFilters) {
+            if (topicArticles.get(filter.getEventKey()).size() < MAX_ARTICLE_COUNT) {
+                needContinue = true;
+                break;
+            }
+        }
+        return needContinue;
     }
 
     private static void loadTopicFilters() {
@@ -90,10 +98,43 @@ public class ClassifyNewsHandler implements WechatEventHandler {
         }
     }
 
+    private static void prependTopicArticles(List<MaterialItem> materialItems) {
+        for (MaterialItem materialItem : materialItems) {
+            List<NewsItem> items = materialItem.content.news_item;
+            List<NewsItem> reversedItems = new ArrayList<>();
+            for (NewsItem item : items) {
+                reversedItems.add(0, item);
+            }
+            for (TopicFilter filter : topicFilters) {
+                List<ArticleItem> articles = topicArticles.get(filter.getEventKey());
+                for (NewsItem item : reversedItems) {
+                    if (item.title.startsWith("【" + filter.getTopic() + "】")) {
+                        ArticleItem article = convert(item);
+                        articles.add(0, article);
+                        logger.info("Update cached article: {}", article.getTitle());
+                        break;
+                    }
+                }
+                if (articles.size() > MAX_ARTICLE_COUNT) {
+                    topicArticles.put(filter.getEventKey(), articles.subList(0, MAX_ARTICLE_COUNT));
+                }
+            }
+        }
+    }
+
+    private static ArticleItem convert(NewsItem item) {
+        ArticleItem article = new ArticleItem();
+        article.setTitle(item.title);
+//        article.setDescription(item.content);
+        article.setUrl(item.url);
+        // XXX how about content_source_url
+        return article;
+    }
+
     @Override
     public ReplyXMLFormat handle(IncomingMassSendJobFinishEventMessage incoming) {
         // Update news material filter result when mass send job finished
-        materialApi.batchGet("news", 0, 1, ClassifyNewsHandler::filterTopicArticles);
+        materialApi.batchGet("news", 0, 1, ClassifyNewsHandler::prependTopicArticles);
         return null;
     }
 

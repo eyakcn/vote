@@ -49,8 +49,12 @@ public class MaterialApi {
             HttpClientRequest batchGetReq = http.post(batchGetUrl, userRes -> userRes.bodyHandler(userResBody -> {
                 final String line = userResBody.toString();
                 final MaterialList materialList = new Gson().fromJson(line, MaterialList.class);
-                logger.info("{} + {}: total({}), items({})", offset, count, materialList.total_count, materialList.item_count);
-                materialConsumer.accept(materialList);
+                if (materialList.isSuccess()) {
+                    logger.info("{} + {}: total({}), items({})", offset, count, materialList.total_count, materialList.item_count);
+                    materialConsumer.accept(materialList);
+                } else {
+                    logger.error(materialList.errcode + ": " + materialList.errmsg);
+                }
             }));
             batchGetReq.putHeader("Content-Type", "application/json");
             batchGetReq.putHeader("Content-Length", postJsonStr.getBytes(StandardCharsets.UTF_8).length + "");
@@ -62,18 +66,16 @@ public class MaterialApi {
 
     public void batchGet(String type, int offset, int count, Consumer<List<MaterialItem>> materialConsumer) {
         innerBatchGet(type, offset, count, materialList -> {
-            if (materialList.isSuccess()) {
-                materialConsumer.accept(materialList.item);
-            } else {
-                logger.error(materialList.errcode + ": " + materialList.errmsg);
-            }
+            materialConsumer.accept(materialList.item);
         });
     }
 
     public void batchGetAll(String type, Consumer<List<MaterialItem>> materialConsumer) {
         final int count = MAX_PER_REQ;
         innerBatchGet(type, 0, count, materialList -> {
-            final int mod = materialList.total_count % count;
+            materialConsumer.accept(materialList.item);
+
+            final int mod = materialList.total_count / count;
             for (int offset = count; offset <= count * mod; offset += count) {
                 batchGet(type, offset, count, materialConsumer);
             }
