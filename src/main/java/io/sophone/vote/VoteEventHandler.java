@@ -47,7 +47,7 @@ public class VoteEventHandler implements WechatEventHandler {
         voteArticle.setPicurl("http://" + domain + "/sysroot/wechat/vote/image/" + Context.voteTheme.image);
         voteArticle.setUrl("http://" + domain + "/wechat/vote?openid=" + news.getToUserName());
         news.setArticles(Arrays.asList(voteArticle));
-        news.setCreateTime((int) (System.currentTimeMillis() / 1000));
+        news.setCreateTime((int) (System.currentTimeMillis() / 1000L));
         return news;
     }
 }
