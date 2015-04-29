@@ -48,8 +48,8 @@ public class MaterialApi {
             logger.info("Fetch {} materials [{} + {}]: {}\n{}", type, offset, count, batchGetUrl, postJsonStr);
             HttpClientRequest batchGetReq = http.post(batchGetUrl, userRes -> userRes.bodyHandler(userResBody -> {
                 final String line = userResBody.toString();
-                logger.info(line);
                 final MaterialList materialList = new Gson().fromJson(line, MaterialList.class);
+                logger.info("{} + {}: total({}), items({})", offset, count, materialList.total_count, materialList.item_count);
                 materialConsumer.accept(materialList);
             }));
             batchGetReq.putHeader("Content-Type", "application/json");

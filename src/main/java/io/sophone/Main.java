@@ -39,5 +39,11 @@ public class Main extends Verticle {
         app.use("/webroot/", new Static("webroot/", 0));
         app.use("/sysroot/", new Static(System.getProperty("user.home") + "/", 0));
         app.listen(80); // XXX Weixin server requires to use port 80
+
+        // TODO cache html templates
+        // TODO provide static resources on separate server
+        // TODO reduce counting update frequency when multiple requests sent at the same time
+        // TODO reply to user delayed, need to close response first and reply later
+        // TODO why there are duplicated user in vote_users.txt
     }
 }

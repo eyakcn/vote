@@ -10,6 +10,9 @@ import io.sophone.sdk.wechat.model.MaterialItem;
 import io.sophone.sdk.wechat.model.NewsItem;
 import io.sophone.sdk.wechat.service.communicate.MaterialApi;
 import io.sophone.wechat.LocalConfig;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.impl.Json;
 
 import java.io.File;
@@ -26,12 +29,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 4/29/15 AD
  */
 public class ClassifyNewsHandler implements WechatEventHandler {
+    private static final Logger logger = LoggerFactory.getLogger(ClassifyNewsHandler.class);
+
     private static final String baseDir = System.getProperty("user.home") + "/wechat/mass/";
-    private static final String filePath = baseDir + "topic_filters.json";
+    private static final String filePath = baseDir + "topic_filters.txt";
     private static final Map<String, List<ArticleItem>> topicArticles = new ConcurrentHashMap<>();
     // XXX make sure LocalConfig has been set with globalConfig and globalHttp
     private static final MaterialApi materialApi = new MaterialApi(LocalConfig.getGlobalConfig(), LocalConfig.getGlobalHttp());
-    private static List<TopicFilter> topicFilters;
+    private static final List<TopicFilter> topicFilters = new ArrayList<>();
 
     static {
         loadTopicFilters();
@@ -60,6 +65,7 @@ public class ClassifyNewsHandler implements WechatEventHandler {
                         article.setUrl(item.url);
                         // XXX how about content_source_url
                         articles.add(article);
+                        logger.info("Pre-cached article: {}", article.getTitle());
                         break;
                     }
                 }
@@ -71,10 +77,13 @@ public class ClassifyNewsHandler implements WechatEventHandler {
         File filterFile = new File(filePath);
         try {
             if (filterFile.exists()) {
-                byte[] bytes = Files.readAllBytes(filterFile.toPath());
-                topicFilters = Json.decodeValue(new String(bytes, StandardCharsets.UTF_8), ArrayList.class);
-            } else {
-                topicFilters = new ArrayList<>();
+                Files.lines(filterFile.toPath(), StandardCharsets.UTF_8).forEach(line -> {
+                    if (StringUtils.isNotBlank(line)) {
+                        TopicFilter filter = Json.decodeValue(line, TopicFilter.class);
+                        topicFilters.add(filter);
+                        logger.info("Topic Filter: {}", filter.getTopic());
+                    }
+                });
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
