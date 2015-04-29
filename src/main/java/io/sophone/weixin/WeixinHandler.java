@@ -34,7 +34,8 @@ public class WeixinHandler extends Middleware {
                 .setKeepAlive(true)
                 .setMaxPoolSize(20);
         logger = verticle.getContainer().logger();
-        wechatApi = new WechatApi(new LocalConfig(), new VoteEventHandler());
+        wechatApi = new WechatApi(new LocalConfig());
+        wechatApi.addHandler(new VoteEventHandler());
     }
 
     @Override
@@ -47,7 +48,6 @@ public class WeixinHandler extends Middleware {
         String nonce = request.getParameter("nonce");
 
         try {
-            wechatApi.setRequest(request);
             switch (request.method()) {
                 case "GET":
                     // validation request from wechat server

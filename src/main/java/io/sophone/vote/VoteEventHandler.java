@@ -6,23 +6,14 @@ import io.sophone.sdk.wechat.message.impl.IncomingClickEventMessage;
 import io.sophone.sdk.wechat.message.impl.IncomingTextMessage;
 import io.sophone.sdk.wechat.message.impl.OutgoingNewsMessage;
 import io.sophone.sdk.wechat.model.ArticleItem;
-import org.vertx.java.core.http.HttpServerRequest;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * @author eyakcn
  * @since 4/23/15 AD
  */
 public class VoteEventHandler implements WechatEventHandler {
-    private HttpServerRequest request;
-
-    @Override
-    public void setRequest(HttpServerRequest request) {
-        this.request = request;
-    }
-
     public ReplyXMLFormat handle(IncomingTextMessage incoming) {
         OutgoingNewsMessage news = new OutgoingNewsMessage();
         news.setToUserName(incoming.getFromUserName());
@@ -51,9 +42,6 @@ public class VoteEventHandler implements WechatEventHandler {
     private OutgoingNewsMessage wrapVoteNews(OutgoingNewsMessage news) {
         ArticleItem voteArticle = new ArticleItem();
         String domain = "www.comearly.com";
-        if (Objects.nonNull(request)) {
-            // TODO get domain name
-        }
         voteArticle.setTitle("火热投票进行中！");
         voteArticle.setDescription(Context.voteTheme.theme);
         voteArticle.setPicurl("http://" + domain + "/sysroot/wechat/vote/image/" + Context.voteTheme.image);

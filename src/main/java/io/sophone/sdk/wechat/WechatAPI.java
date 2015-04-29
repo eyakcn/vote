@@ -6,7 +6,6 @@ import io.sophone.sdk.wechat.message.impl.*;
 import org.dom4j.DocumentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.http.HttpServerRequest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -18,7 +17,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author eyakcn
@@ -27,13 +29,13 @@ import java.util.Arrays;
 public class WechatApi {
     private static final Logger logger = LoggerFactory.getLogger(WechatApi.class);
     private final WechatConfig config;
-    private final WechatEventHandler eventHandler;
+    private final List<WechatEventHandler> handlers;
     private final byte[] appIdBytes;
     private final byte[] aesKeyBytes;
 
-    public WechatApi(WechatConfig config, WechatEventHandler eventHandler) {
+    public WechatApi(WechatConfig config) {
         this.config = config;
-        this.eventHandler = eventHandler;
+        this.handlers = new ArrayList<>();
         this.appIdBytes = config.getAppId().getBytes(Charset.forName("utf-8"));
         if (config.getAESKey() != null) {
             this.aesKeyBytes = DatatypeConverter.parseBase64Binary(config.getAESKey() + "=");
@@ -42,8 +44,8 @@ public class WechatApi {
         }
     }
 
-    public void setRequest(HttpServerRequest request) {
-        this.eventHandler.setRequest(request);
+    public void addHandler(WechatEventHandler handler) {
+        handlers.add(handler);
     }
 
     public boolean isEncrypted() {
@@ -125,6 +127,16 @@ public class WechatApi {
     }
 
     private ReplyXMLFormat dispatch(Message dec) {
+        for (WechatEventHandler eventHandler : handlers) {
+            ReplyXMLFormat result = handlerMessage(eventHandler, dec);
+            if (Objects.nonNull(result)) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private ReplyXMLFormat handlerMessage(WechatEventHandler eventHandler, Message dec) {
         if (dec instanceof IncomingTextMessage) {
             return eventHandler.handle((IncomingTextMessage) dec);
         } else if (dec instanceof IncomingSubscribeEventMessage) {

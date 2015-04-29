@@ -190,10 +190,11 @@ public final class WechatVoteHandler extends Middleware {
             final String userKey = entry.getKey();
             YokeRequest countingRequest = entry.getValue();
             try {
+                logger.info("Check counting request: " + countingRequest.method() + " " + countingRequest.uri());
                 writeSseMessage(countingRequest.response(), responseText);
-                logger.info("Response counting request for " + contentId + " to " + userKey);
+                logger.info("Response counting request for " + contentId + " to " + userKey + ", IP=" + countingRequest.ip());
             } catch (Throwable t) {
-                logger.error("Failed to response counting request for " + contentId + " to " + userKey, t);
+                logger.error("Failed to response counting request for " + contentId + " to " + userKey + ", IP=" + countingRequest.ip(), t);
                 countingRequests.remove(userKey);
                 logger.info("Counting request removed before sent. contentId = " + contentId + ", openid = " + userKey);
             }
