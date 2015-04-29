@@ -35,4 +35,8 @@ public interface WechatEventHandler {
     default ReplyXMLFormat handle(IncomingViewEventMessage incoming) {
         return null;
     }
+
+    default ReplyXMLFormat handle(IncomingMassSendJobFinishEventMessage incoming) {
+        return null;
+    }
 }

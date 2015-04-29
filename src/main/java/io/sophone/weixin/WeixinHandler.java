@@ -3,6 +3,7 @@ package io.sophone.weixin;
 import com.jetdrone.vertx.yoke.Middleware;
 import com.jetdrone.vertx.yoke.middleware.YokeRequest;
 import com.jetdrone.vertx.yoke.middleware.YokeResponse;
+import io.sophone.mass.ClassifyNewsHandler;
 import io.sophone.sdk.wechat.WechatApi;
 import io.sophone.vote.VoteEventHandler;
 import io.sophone.wechat.LocalConfig;
@@ -36,6 +37,7 @@ public class WeixinHandler extends Middleware {
         logger = verticle.getContainer().logger();
         wechatApi = new WechatApi(new LocalConfig());
         wechatApi.addHandler(new VoteEventHandler());
+        wechatApi.addHandler(new ClassifyNewsHandler());
     }
 
     @Override

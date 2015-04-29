@@ -151,6 +151,8 @@ public class WechatApi {
             return eventHandler.handle((IncomingClickEventMessage) dec);
         } else if (dec instanceof IncomingViewEventMessage) {
             return eventHandler.handle((IncomingViewEventMessage) dec);
+        } else if (dec instanceof IncomingMassSendJobFinishEventMessage) {
+            return eventHandler.handle((IncomingMassSendJobFinishEventMessage) dec);
         } else {
             return null;
         }

@@ -101,6 +101,19 @@ public class Messages {
                 msg.setEventKey(e(root, "EventKey"));
                 return msg;
             }
+            case "MASSSENDJOBFINISH": {
+                IncomingMassSendJobFinishEventMessage msg = new IncomingMassSendJobFinishEventMessage();
+                msg.setFromUserName(e(root, "FromUserName"));
+                msg.setToUserName(e(root, "ToUserName"));
+                msg.setCreateTime(Integer.parseInt(e(root, "CreateTime")));
+                msg.setMsgId(e(root, "MsgID"));
+                msg.setStatus(e(root, "Status"));
+                msg.setTotalCount(Integer.parseInt(e(root, "TotalCount")));
+                msg.setFilterCount(Integer.parseInt(e(root, "FilterCount")));
+                msg.setSentCount(Integer.parseInt(e(root, "SentCount")));
+                msg.setErrorCount(Integer.parseInt(e(root, "ErrorCount")));
+                return msg;
+            }
         }
         return null;
     }
